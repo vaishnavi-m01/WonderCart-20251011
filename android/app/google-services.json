@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "768244041715",
+    "project_id": "ecommercewondercart-474709",
+    "storage_bucket": "ecommercewondercart-474709.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768244041715:android:18a6611935729f588ef486",
+        "android_client_info": {
+          "package_name": "com.ecommercewondercart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768244041715-tnbtgnpfmfch586i1led0joj0t8lb65r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-Q2oNwZTLxCAXja4KiN5tm_QRVhuSMEc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768244041715-tnbtgnpfmfch586i1led0joj0t8lb65r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
