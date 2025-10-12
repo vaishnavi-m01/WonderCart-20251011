@@ -126,23 +126,23 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
       <View style={styles.rightSection}>
         {!isSearchActive && showSearch && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={onSearchToggle}
           >
             <Fontisto name="search" color="#0077CC" size={20} />
           </TouchableOpacity>
         )}
-        
+
         {showWishlist && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={onWishlistPress}
           >
             <EvilIcons name="heart" color="#0077CC" size={24} />
           </TouchableOpacity>
         )}
-        
+
         {rightIcon}
       </View>
     </View>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#F5F5F5',
     marginRight: 12,
-    left:-6
+    left: -6
   },
   menuButton: {
     padding: 8,
@@ -185,9 +185,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    color: '#0077CC',
+    fontSize: 20,
     fontWeight: '700',
-    color: '#1A1A1A',
+    // color: '#1A1A1A',
     marginBottom: 2,
   },
   subtitle: {
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#F5F5F5',
   },
-  
+
   // Header Style Variants
   defaultContainer: {
     // Uses base container styles
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontWeight: '500',
   },
-  
+
   homeContainer: {
     backgroundColor: '#FFFFFF',
     elevation: 8,
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
     color: '#999999',
     fontWeight: '400',
   },
-  
+
   minimalContainer: {
     backgroundColor: '#FFFFFF',
     elevation: 4,

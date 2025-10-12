@@ -36,6 +36,7 @@ import GetStartedSwiper from '../pages/GetStartedSwiper';
 import GetStarted1 from '../pages/GetStarted1';
 import GetStarted2 from '../pages/GetStarted2';
 import GetStarted3 from '../pages/GetStarted3';
+import ProductReviewAddPhoto from '../pages/ProductReviewAddPhoto';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -72,6 +73,7 @@ export type RootStackParamList = {
   GetStarted2: undefined;
   GetStarted3: undefined;
   GetStartedSwiper: undefined;
+  ProductReviewAddPhoto: undefined;
 
 };
 
@@ -89,18 +91,22 @@ const StackScreen = () => (
             showBackButton={!!back}
             onBackPress={() => navigation.goBack()}
             headerStyle="default"
-            
+
           />
         ),
       }}
     >
-      
+
 
       <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
       <Stack.Screen name="GetStartedSwiper" component={GetStartedSwiper} options={{ headerShown: false }} />
       <Stack.Screen name="GetStarted1" component={GetStarted1} options={{ headerShown: false }} />
       <Stack.Screen name="GetStarted2" component={GetStarted2} options={{ headerShown: false }} />
       <Stack.Screen name="GetStarted3" component={GetStarted3} options={{ headerShown: false }} />
+      <Stack.Screen name="ProductReviewAddPhoto" component={ProductReviewAddPhoto} options={{
+        headerShown: true,
+        title: "Add Photos & Videos",
+      }} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="ProductDetails" component={SeparateProductDetails} />
@@ -126,10 +132,13 @@ const StackScreen = () => (
       <Stack.Screen name="FullScreenImage" component={FullScreenImage} />
       <Stack.Screen name="SignUp" component={SignUp} />
       <Stack.Screen name="SignIn" component={SignIn} />
-      <Stack.Screen name="DeliveryAddress" component={DeliveryAddress} />
+      <Stack.Screen name="DeliveryAddress" component={DeliveryAddress}     options={{
+          headerShown: true,
+          title: "Delivery Address",
+        }}/>
       <Stack.Screen name="DeliveryAddressForm" component={DeliveryAddressForm} options={{ headerShown: false }} />
       <Stack.Screen name="PaymentPage" component={PaymentPage} options={{ headerShown: false }} />
-      <Stack.Screen name="Wishlist" component={Wishlist} />
+      <Stack.Screen name="Wishlist" component={Wishlist}  options={{ headerShown: true }}/>
       <Stack.Screen name="Payment" component={Payment} />
       <Stack.Screen name="OrderDetails" component={OrderDetails} options={{ headerShown: false }} />
       <Stack.Screen name="Orders" component={Orders} />

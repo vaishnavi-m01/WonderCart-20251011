@@ -27,6 +27,7 @@ export default function Categories() {
                     const processedCategories = response.data.map((category: any) => ({
                         ...category,
                         imageUrl: category.imageUrl || `https://via.placeholder.com/150/0077CC/FFFFFF?text=${encodeURIComponent(category.name)}`
+
                     }));
                     
                     console.log("Processed Categories for Home:", processedCategories);

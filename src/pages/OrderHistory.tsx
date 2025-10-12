@@ -1,5 +1,7 @@
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { CheckCircle, Package, Truck } from "lucide-react-native";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import {
     ActivityIndicator,
     Modal,
@@ -16,6 +18,7 @@ import {
 import apiClient from "../services/apiBaseUrl";
 import { useEffect, useState } from "react";
 import InvoiceModal from "./OrderPrivewModal";
+
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -105,6 +108,7 @@ const OrderHistory = () => {
     const [reason, setReason] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [refundRequested, setRefundRequested] = useState(false);
+    const [rating, setRating] = useState(0);
 
 
     const firstOrder = orders[0]; // use first order for shared fields
@@ -265,6 +269,29 @@ const OrderHistory = () => {
                         </>
                     );
                 })}
+
+                <View style={styles.reviewContainer}>
+                    <Text style={styles.reviewText}>Rating</Text>
+                    <View style={styles.starRow}>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                                <Icon
+                                    name="star"
+                                    size={30}
+                                    color={i <= rating ? '#FFD700' : '#ccc'}
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                <View style={styles.reviewContainer}>
+                    <Text style={styles.reviewText}>Add Phots & Videos</Text>
+                    <TouchableOpacity style={styles.reviewbtn} onPress={() =>navigation.navigate("ProductReviewAddPhoto")}>
+                        <Image source={require("../assets/icons/AddCamera.png")} style={{height:30,width:30,}}></Image>
+                          <Text style={styles.feedbacktext}>Add Phots & Videos</Text>
+                    </TouchableOpacity>
+                </View>
 
 
                 {/* Address */}
@@ -601,4 +628,36 @@ const styles = StyleSheet.create({
     },
     submitText: { color: "#fff", fontWeight: "bold" },
     cancelText: { marginTop: 10, color: "#888", textAlign: "center" },
+    reviewContainer:{
+      flexDirection:"row",
+      justifyContent:"space-between",
+     marginHorizontal:12,
+     marginTop:10
+    },
+    reviewText:{
+         fontSize:16,
+         fontWeight:800,
+         top:3,
+         fontFamily:"Jost"
+    },
+    starRow: {
+        flexDirection: 'row',
+        marginBottom: 20,
+    },
+    reviewbtn:{
+        backgroundColor:"#00A2F4",
+        borderRadius:5,
+        paddingVertical:6,
+        paddingHorizontal:8,
+        flexDirection:"row",
+        gap:5,
+        textAlign:"center"
+    },
+    feedbacktext:{
+        fontFamily:"Jost",
+        fontWeight:800,
+        fontSize:14,
+        color:"#FFFFFF",
+        top:4
+    }
 });

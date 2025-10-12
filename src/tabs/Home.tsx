@@ -136,7 +136,7 @@ const Home = () => {
                 setTrendingProducts(data.slice(0, 8));
             })
             .catch((error: any) => {
-                console.error('Failed to load trending collection', error);
+              console.error('Failed to load trending collection', error);
             });
     }, []);
 
@@ -166,8 +166,8 @@ const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                console.log("homepagetry")
                 const [category3Res, category6Res] = await Promise.all([
-
                     apiClient.get(`v2/products/filter?categoryId=6`),
                     apiClient.get(`v2/products/filter?categoryId=3`),
                 ]);
@@ -179,6 +179,7 @@ const Home = () => {
 
                 setTopSellerProduct(combined);
             } catch (error) {
+                 console.log("homepagecatch")
                 console.error("Error fetching top seller products", error);
             }
         };
@@ -392,7 +393,7 @@ const Home = () => {
                 {/* Modern Shop By Category Section */}
                 <View style={styles.modernCategoryContainer}>
                     <View style={styles.modernCategoryHeader}>
-                        <Text style={styles.modernCategoryTitle}>🛍️ Shop By Category</Text>
+                        <Text style={styles.modernCategoryTitle}>🛍️ Shop By Categoryy</Text>
                         <Text style={styles.categorySubtitle}>Explore our wide range of products</Text>
                     </View>
                     <Categories />
@@ -1114,6 +1115,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,
+        marginBottom:3
     },
     modernActionButton: {
         alignItems: 'center',

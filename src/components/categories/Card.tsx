@@ -9,40 +9,29 @@ type Data = {
    title: string;
 };
 
-const CategoryCard = ({ image, title, onPress }: Data & { onPress?: () => void }) => {
+const CategoryCard = ({ image, title }: Data) => {
    const [imageError, setImageError] = useState(false);
    const [pressed, setPressed] = useState(false);
 
-   // Fallback image URL
    const fallbackImageUrl = `https://via.placeholder.com/300/0077CC/FFFFFF?text=${encodeURIComponent(title)}`;
 
    return (
-      <TouchableOpacity
+      <View
          style={[styles.container, pressed && styles.pressedContainer]}
-         activeOpacity={0.9}
-          onPress={onPress} 
-         onPressIn={() => setPressed(true)}
-         onPressOut={() => setPressed(false)}
+         pointerEvents="none"
       >
          <View style={styles.imageContainer}>
             <Image
                source={{ uri: imageError ? fallbackImageUrl : image }}
                style={styles.banner}
                resizeMode="cover"
-               onError={() => {
-                  console.log('Image failed to load:', image);
-                  setImageError(true);
-               }}
-               onLoad={() => {
-                  console.log('Image loaded successfully:', image);
-                  setImageError(false);
-               }}
+               onError={() => setImageError(true)}
+               onLoad={() => setImageError(false)}
             />
             <LinearGradient
+               pointerEvents="none"
                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
                style={styles.gradientOverlay}
-               start={{ x: 0, y: 0 }}
-               end={{ x: 0, y: 1 }}
             />
             <View style={styles.categoryBadge}>
                <MaterialIcons name="category" size={16} color="#FFFFFF" />
@@ -50,24 +39,19 @@ const CategoryCard = ({ image, title, onPress }: Data & { onPress?: () => void }
          </View>
          <View style={styles.content}>
             <View style={styles.textContainer}>
-               <Text
-                  style={styles.title}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-               >
+               <Text style={styles.title} numberOfLines={2}>
                   {title}
                </Text>
-
-
                <Text style={styles.subtitle}>Shop Now</Text>
             </View>
             <View style={styles.arrowContainer}>
                <AntDesign name="arrowright" size={16} color="#FFFFFF" />
             </View>
          </View>
-      </TouchableOpacity>
+      </View>
    );
 };
+
 
 export default CategoryCard;
 
@@ -90,6 +74,7 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.1,
       shadowRadius: 15,
       elevation: 8,
+      // backgroundColor:"red"
    },
    imageContainer: {
       position: 'relative',

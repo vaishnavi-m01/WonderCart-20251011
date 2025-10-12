@@ -39,7 +39,7 @@ const CustomDrawerContent = (props: any) => {
   useEffect(() => {
     // Load user info
     loadUserInfo();
-    
+
     // Animate drawer content
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -133,7 +133,7 @@ const CustomDrawerContent = (props: any) => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <Animated.View 
+        <Animated.View
           style={[
             styles.headerContent,
             {
@@ -183,8 +183,8 @@ const CustomDrawerContent = (props: any) => {
       </LinearGradient>
 
       {/* Menu Items */}
-      <DrawerContentScrollView 
-        {...props} 
+      <DrawerContentScrollView
+        {...props}
         contentContainerStyle={styles.menuContainer}
         showsVerticalScrollIndicator={false}
       >
@@ -196,7 +196,7 @@ const CustomDrawerContent = (props: any) => {
               {
                 opacity: fadeAnim,
                 transform: [
-                  { 
+                  {
                     translateX: slideAnim.interpolate({
                       inputRange: [-50, 0],
                       outputRange: [-50, 0],
@@ -305,7 +305,7 @@ export default function ProfileDrawer() {
           headerShown: true,
           header: ({ navigation }) => (
             <UnifiedHeader
-              title="My Orders"
+              title="MyOrders"
               showBackButton={true}
               onBackPress={() => navigation.goBack()}
               headerStyle="default"
@@ -318,8 +318,17 @@ export default function ProfileDrawer() {
         name="DeliveryAddress"
         component={DeliveryAddress}
         options={{
-          title: "Address",
-          drawerIcon: ({ color, size }) => <EvilIcons name="location" size={28} color={color} />,
+          title: "My Orders",
+          headerShown: true,
+          header: ({ navigation }) => (
+            <UnifiedHeader
+              title="My Orders"
+              showBackButton={true}
+              onBackPress={() => navigation.goBack()}
+              headerStyle="default"
+            />
+          ),
+          drawerIcon: ({ color, size }) => <Feather name="box" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -343,7 +352,17 @@ export default function ProfileDrawer() {
         name="Wishlist"
         component={Wishlist}
         options={{
-          drawerIcon: ({ color, size }) => <Foundation name="heart" size={size} color="red" />,
+          title: "Wishlist",
+          headerShown: true,
+          header: ({ navigation }) => (
+            <UnifiedHeader
+              title="Wishlist"
+              showBackButton={true}
+              onBackPress={() => navigation.goBack()}
+              headerStyle="default"
+            />
+          ),
+          drawerIcon: ({ color, size }) => <MaterialCommunityIcons name="tag-outline" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -367,22 +386,52 @@ export default function ProfileDrawer() {
         name="FAQ"
         component={FAQ}
         options={{
-          drawerIcon: ({ color, size }) => <SimpleLineIcons name="question" size={size} color={color} />,
+          title: "FAQ",
+          headerShown: true,
+          header: ({ navigation }) => (
+            <UnifiedHeader
+              title="FAQ"
+              showBackButton={true}
+              onBackPress={() => navigation.goBack()}
+              headerStyle="default"
+            />
+          ),
+          drawerIcon: ({ color, size }) => <Feather name="headphones" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
         name="TermsAndConditions"
         component={TermsAndConditions}
-        options={{
+       options={{
           title: "Terms & Conditions",
-          drawerIcon: ({ color, size }) => <MaterialIcons name="verified-user" size={size} color={color} />,
+          headerShown: true,
+          header: ({ navigation }) => (
+            <UnifiedHeader
+              title="Terms & Conditions
+              "
+              showBackButton={true}
+              onBackPress={() => navigation.goBack()}
+              headerStyle="default"
+            />
+          ),
+          drawerIcon: ({ color, size }) => <Feather name="headphones" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
         name="PrivacyPolicy"
         component={PrivacyPolicy}
         options={{
-          drawerIcon: ({ color, size }) => <MaterialIcons name="security" size={size} color={color} />,
+          title: "Privacy Policy",
+          headerShown: true,
+          header: ({ navigation }) => (
+            <UnifiedHeader
+              title="Privacy Policy"
+              showBackButton={true}
+              onBackPress={() => navigation.goBack()}
+              headerStyle="default"
+            />
+          ),
+          drawerIcon: ({ color, size }) => <Feather name="headphones" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
