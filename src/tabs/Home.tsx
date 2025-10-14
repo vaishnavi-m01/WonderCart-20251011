@@ -38,6 +38,8 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Categor
 type Product = {
     productId: number;
     title: string;
+    originalPrice :string;
+    price:string;
     variants?: {
         price: number;
         variantImage: {
@@ -330,9 +332,9 @@ const Home = () => {
                         ) : (
                             <Text style={styles.modernUserName}>Welcome to WonderCart ✨</Text>
                         )}
-                        <Text style={styles.modernSubText}>Discover amazing products tailored for you</Text>
+                        {/* <Text style={styles.modernSubText}>Discover amazing products tailored for you</Text> */}
                     </View>
-                    <View style={styles.headerActions}>
+                    {/* <View style={styles.headerActions}>
                         <TouchableOpacity
                             style={styles.notificationButton}
                             onPress={() =>
@@ -345,7 +347,7 @@ const Home = () => {
                             </View>
                         </TouchableOpacity>
 
-                    </View>
+                    </View> */}
                 </View>
             </View>
 
@@ -393,7 +395,7 @@ const Home = () => {
                 {/* Modern Shop By Category Section */}
                 <View style={styles.modernCategoryContainer}>
                     <View style={styles.modernCategoryHeader}>
-                        <Text style={styles.modernCategoryTitle}>🛍️ Shop By Categoryy</Text>
+                        <Text style={styles.modernCategoryTitle}>🛍️ Shop By Category</Text>
                         <Text style={styles.categorySubtitle}>Explore our wide range of products</Text>
                     </View>
                     <Categories />
@@ -505,6 +507,7 @@ const Home = () => {
                                     <View style={styles.priceContainer}>
                                         <Text style={styles.originalPrice}>₹{item.originalPrice || item.price}</Text>
                                         <Text style={styles.salePrice}>₹{item.variants?.price || item.price}</Text>
+                                        <Text style={styles.text}>{item.title}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -764,7 +767,8 @@ const styles = StyleSheet.create({
         // backgroundColor: '#E4F4FF',
         padding: 6,
         margin: 0,
-        width: "100%"
+        width: "100%",
+        
     },
     tobsubConatiner: {
         flexDirection: "row",
@@ -1108,7 +1112,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         backgroundColor: '#FFFFFF',
         marginHorizontal: 16,
-        marginTop: -16,
+        marginTop: -22,
         borderRadius: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },

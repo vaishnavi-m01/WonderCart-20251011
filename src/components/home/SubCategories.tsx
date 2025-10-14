@@ -145,22 +145,6 @@ const SubCategories = () => {
             const categoryId = subcategories[0].categoryId;
             fetchProduct(categoryId);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }, [subcategories]);
 
     useEffect(() => {

@@ -27,6 +27,7 @@ type RootStackParamList = {
 };
 
 interface OrderItem {
+    userId: number;
     orderId: number;
     orderNumber: string;
     orderItemId: number;
@@ -51,6 +52,11 @@ interface OrderItem {
     shippingPinCode: string;
     shippingCountryName: string;
 }
+type OrderItems = {
+    orderItemId: number;
+    productName: string;
+    // ... any other properties
+};
 
 const trackingUpdates = [
     {
@@ -102,6 +108,7 @@ const OrderHistory = () => {
     const { orderId } = route.params;
 
     const [orders, setOrders] = useState<OrderItem[]>([]);
+    console.log("orders", orders)
     const [loading, setLoading] = useState(true);
 
     const [modalVisible, setModalVisible] = useState(false);
@@ -109,6 +116,10 @@ const OrderHistory = () => {
     const [showModal, setShowModal] = useState(false);
     const [refundRequested, setRefundRequested] = useState(false);
     const [rating, setRating] = useState(0);
+    const [selectedOrderItem, setSelectedOrderItem] = useState<OrderItems | null>(null);
+    const [isSelectProductModalVisible, setIsSelectProductModalVisible] = useState(false);
+    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+
 
 
     const firstOrder = orders[0]; // use first order for shared fields
@@ -196,19 +207,23 @@ const OrderHistory = () => {
         }
     };
 
+
+    const handleCancelOrder = () => {
+        const activeOrders = orders?.filter(o => o.orderStatusName !== 'CANCELED');
+        console.log("activeOrders", activeOrders)
+        if (activeOrders?.length === 1) {
+            // Only one active order, go directly to confirm
+            setSelectedOrderItem(activeOrders[0]);
+            setIsConfirmModalVisible(true);
+        } else if (activeOrders?.length > 1) {
+            // Show select product modal
+            setIsSelectProductModalVisible(true);
+        }
+    };
+
     return (
         <View style={styles.container}>
-            {/* <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign
-                        name="arrowleft"
-                        color="#0077CC"
-                        size={26}
-                        style={styles.icon}
-                    />
-                </TouchableOpacity>
-                <Text style={styles.text}>Order Details</Text>
-            </View> */}
+
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
                 {orders.map((order, index) => {
@@ -241,7 +256,7 @@ const OrderHistory = () => {
                                             <Text style={styles.date}>
                                                 {formatOrderDate(order.createdAt)}
                                             </Text>
-                                            <View style={{ alignItems: "flex-start", bottom: -9 }}>
+                                            {/* <View style={{ alignItems: "flex-start", bottom: -9 }}>
                                                 {order?.orderStatusName !== 'CANCELED' && (
                                                     <TouchableOpacity
                                                         style={styles.smallButtonCancel}
@@ -250,6 +265,21 @@ const OrderHistory = () => {
                                                         <Text style={styles.buttonTextCancel}>Cancel Order</Text>
                                                     </TouchableOpacity>
                                                 )}
+                                            </View> */}
+
+                                            <View style={{ alignItems: "flex-start", bottom: -9 }}>
+                                                <TouchableOpacity
+                                                    style={styles.smallButtonCancel}
+                                                    onPress={() =>
+                                                        navigation.navigate("ProductReviewAddPhoto", {
+                                                            productId: order.productId,
+                                                            variantId: order.variantId,
+                                                            userId: order.userId
+                                                        })
+                                                    }
+                                                >
+                                                    <Text style={styles.buttonTextCancel}>Add Review</Text>
+                                                </TouchableOpacity>
                                             </View>
 
                                         </View>
@@ -270,7 +300,7 @@ const OrderHistory = () => {
                     );
                 })}
 
-                <View style={styles.reviewContainer}>
+                {/* <View style={styles.reviewContainer}>
                     <Text style={styles.reviewText}>Rating</Text>
                     <View style={styles.starRow}>
                         {[1, 2, 3, 4, 5].map((i) => (
@@ -283,15 +313,27 @@ const OrderHistory = () => {
                             </TouchableOpacity>
                         ))}
                     </View>
-                </View>
+                </View> */}
 
-                <View style={styles.reviewContainer}>
+                {/* <View style={styles.reviewContainer}>
                     <Text style={styles.reviewText}>Add Phots & Videos</Text>
-                    <TouchableOpacity style={styles.reviewbtn} onPress={() =>navigation.navigate("ProductReviewAddPhoto")}>
-                        <Image source={require("../assets/icons/AddCamera.png")} style={{height:30,width:30,}}></Image>
-                          <Text style={styles.feedbacktext}>Add Phots & Videos</Text>
-                    </TouchableOpacity>
-                </View>
+                    {orders.map((order, index) => (
+                        <TouchableOpacity
+                            key={order.orderId ?? index}
+                            style={styles.reviewbtn}
+                            onPress={() =>
+                                navigation.navigate("ProductReviewAddPhoto", {
+                                    productId: order.productId,
+                                    variantId: order.variantId,
+                                    userId:order.userId
+                                })
+                            }
+                        >
+                            <Text >Add Review Photo</Text>
+                        </TouchableOpacity>
+                    ))}
+
+                </View> */}
 
 
                 {/* Address */}
@@ -387,6 +429,17 @@ const OrderHistory = () => {
                         </Text>
                     </TouchableOpacity>
 
+
+                    {orders?.some(order => order.orderStatusName !== 'CANCELED') && (
+                        <TouchableOpacity
+                            style={styles.orderCancelBtn}
+                            onPress={handleCancelOrder}
+                        >
+                            <Text style={styles.orderCancelText}>Cancel Order</Text>
+                        </TouchableOpacity>
+                    )}
+
+
                     <View style={styles.bottomLinks}>
                         <TouchableOpacity
                             style={styles.linkButton}
@@ -443,6 +496,96 @@ const OrderHistory = () => {
                     </View>
                 </View>
             </Modal>
+            {/* //select order cancel model */}
+
+            <Modal
+                visible={isSelectProductModalVisible}
+                transparent
+                animationType="slide"
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Select a product to cancel:</Text>
+                        {orders?.filter(o => o.orderStatusName !== 'CANCELED')?.map((order, idx) => (
+                            <TouchableOpacity
+                                key={idx}
+                                onPress={() => {
+
+                                    setIsSelectProductModalVisible(false);
+                                    setIsConfirmModalVisible(true);
+                                    setSelectedOrderItem(order);
+                                }}
+                                style={styles.modalOption}
+                            >
+                                <Text>{order.productName}</Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        <TouchableOpacity
+                            onPress={() => setIsSelectProductModalVisible(false)}
+                            style={styles.modalCancelBtn}
+                        >
+                            <Text style={{ color: 'red' }}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+            {/* //cancel confirm model */}
+
+            <Modal
+                visible={isConfirmModalVisible}
+                transparent
+                animationType="fade"
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>
+                            Confirm cancel for: {selectedOrderItem?.productName}?
+                        </Text>
+
+                        <View style={{ flexDirection: "row", justifyContent: "center", gap: 12, marginTop: 15, marginBottom: 10 }}>
+
+                            <TouchableOpacity
+                                onPress={() => setIsConfirmModalVisible(false)}
+                                style={{
+                                    backgroundColor: "#F8D7DA",
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 20,
+                                    borderRadius: 6,
+                                    alignItems: "center",
+                                    borderWidth: 1,
+                                    borderColor: "#F5C6CB",
+                                    minWidth: 100,
+                                }}
+                            >
+                                <Text style={{ color: "#721C24", fontWeight: "600", fontSize: 14 }}>No</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    updateOrderStatus(selectedOrderItem?.orderItemId ?? 0);
+                                    setIsConfirmModalVisible(false);
+                                }}
+                                style={{
+                                    backgroundColor: "#0077CC",
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 20,
+                                    borderRadius: 6,
+                                    alignItems: "center",
+                                    minWidth: 100,
+                                }}
+                            >
+                                <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>Yes, Cancel</Text>
+                            </TouchableOpacity>
+
+                        </View>
+
+
+                    </View>
+                </View>
+            </Modal>
+
+
         </View>
     );
 };
@@ -524,11 +667,11 @@ const styles = StyleSheet.create({
     smallButtonCancel: {
         paddingVertical: 4,
         paddingHorizontal: 10,
-        backgroundColor: '#FFEBEE',
+        backgroundColor: '#007CEE',
         borderRadius: 6,
         marginRight: 8,
     },
-    buttonTextCancel: { fontSize: 12, color: '#D32F2F', fontWeight: '600' },
+    buttonTextCancel: { fontSize: 12, color: '#fff', fontWeight: '600' },
     line: {
         height: 1,
         backgroundColor: "#D9D9D9",
@@ -604,13 +747,27 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     refundText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+
+    orderCancelBtn: {
+        backgroundColor: "#ffe6e6",
+        paddingVertical: 12,
+        paddingHorizontal: 110,
+        borderRadius: 8,
+        marginBottom: 25,
+        width: "100%",
+        alignItems: "center",
+
+    },
+    orderCancelText: { color: "#dc3545", fontWeight: "600", fontSize: 16 },
+
+
     bottomLinks: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
     linkButton: { paddingHorizontal: 10, paddingVertical: 6 },
     linkText: { color: "#007AFF", fontSize: 14, fontWeight: "500" },
     verticalDivider: { width: 1, height: 14, backgroundColor: "#ccc", marginHorizontal: 10 },
     modalOverlay: { flex: 1, backgroundColor: "#000000aa", justifyContent: "center", padding: 20 },
     modalContent: { backgroundColor: "#fff", borderRadius: 10, padding: 20 },
-    modalTitle: { fontWeight: "bold", marginBottom: 10, fontSize: 16 },
+    modalTitle: { fontWeight: "bold", marginBottom: 10, fontSize: 16, marginTop: 5 },
     textInput: {
         borderWidth: 1,
         borderColor: "#ccc",
@@ -628,36 +785,63 @@ const styles = StyleSheet.create({
     },
     submitText: { color: "#fff", fontWeight: "bold" },
     cancelText: { marginTop: 10, color: "#888", textAlign: "center" },
-    reviewContainer:{
-      flexDirection:"row",
-      justifyContent:"space-between",
-     marginHorizontal:12,
-     marginTop:10
+    reviewContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: 12,
+        marginTop: 10
     },
-    reviewText:{
-         fontSize:16,
-         fontWeight:800,
-         top:3,
-         fontFamily:"Jost"
+    reviewText: {
+        fontSize: 16,
+        fontWeight: 800,
+        top: 3,
+        fontFamily: "Jost"
     },
     starRow: {
         flexDirection: 'row',
         marginBottom: 20,
     },
-    reviewbtn:{
-        backgroundColor:"#00A2F4",
-        borderRadius:5,
-        paddingVertical:6,
-        paddingHorizontal:8,
-        flexDirection:"row",
-        gap:5,
-        textAlign:"center"
+    reviewbtn: {
+        backgroundColor: "#00A2F4",
+        borderRadius: 5,
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        flexDirection: "row",
+        gap: 5,
+        textAlign: "center"
     },
-    feedbacktext:{
-        fontFamily:"Jost",
-        fontWeight:800,
-        fontSize:14,
-        color:"#FFFFFF",
-        top:4
-    }
+    feedbacktext: {
+        fontFamily: "Jost",
+        fontWeight: 800,
+        fontSize: 14,
+        color: "#FFFFFF",
+        top: 4
+    },
+    modalBackground: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+    },
+    modalOption: {
+        paddingVertical: 10,
+    },
+    modalCancelBtn: {
+        marginTop: 10,
+        alignItems: 'center',
+    },
+    confirmButton: {
+        backgroundColor: 'red',
+        padding: 10,
+        alignItems: 'center',
+        borderRadius: 5,
+        marginTop: 10,
+    },
+
 });

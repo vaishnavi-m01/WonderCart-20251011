@@ -411,7 +411,7 @@ const Categories = () => {
           ]}
         >
           <View style={styles.filterHeader}>
-            <MaterialIcons name="filter-list" size={24} color="#0077CC" />
+            <MaterialIcons name="filter-list" size={22} color="#0077CC" />
             <Text style={styles.filterTitle}>Quick Filters</Text>
           </View>
           <ScrollView
