@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Image, FlatList, TouchableOpacity, Alert, ToastAndroid, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Image, FlatList, TouchableOpacity, Alert, ToastAndroid, Platform, ImageBackground } from 'react-native';
 import TopSeller from '../components/home/TopSeller';
 import LinearGradient from 'react-native-linear-gradient';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
@@ -7,7 +7,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BannerCarousel from '../components/home/BannerCarousel';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NavigationProp, ParamListBase, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Categories from '../components/home/Categories';
 import apiClient from '../services/apiBaseUrl';
@@ -20,7 +20,11 @@ import { getProductThumbnail } from '../utils/ProductImageHelper';
 import SecureStorage from '../services/SecureStorage';
 import UnifiedHeader from '../components/common/UnifiedHeader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 
+import { DrawerActions, useNavigation } from '@react-navigation/native';
+import { drawerNavigationRef, navigationRef, openDrawer, openProfileDrawer } from '../navigation/navigationRef';
+import OpenDrawer from '../utils/openDrawer';
 
 
 type RootStackParamList = {
@@ -29,17 +33,30 @@ type RootStackParamList = {
     SeparateProductPage: { productId: number };
     TopSellerProduct: { topSellerProduct: Product[] };
     JewelleryProduct: { JewelleryProducts: Product[] };
-    Main: { screen?:any };
-
-
+    Main: { screen?: any };
 }
+
+type DrawerParamList = {
+    "My Account": undefined;
+    Orders: undefined;
+    DeliveryAddress: undefined;
+    Offers: undefined;
+    Wishlist: undefined;
+    Support: undefined;
+    FAQ: undefined;
+    TermsAndConditions: undefined;
+    PrivacyPolicy: undefined;
+    Home: undefined;
+};
+
+
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CategoriesProduct'>;
 
 type Product = {
     productId: number;
     title: string;
-    originalPrice :string;
-    price:string;
+    originalPrice: string;
+    price: string;
     variants?: {
         price: number;
         variantImage: {
@@ -78,7 +95,7 @@ const ITEM_WIDTH = Dimensions.get("window").width;
 
 const Home = () => {
 
-    const navigation = useNavigation<HomeScreenNavigationProp>();
+    const navigations = useNavigation<HomeScreenNavigationProp>();
     const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
     const [JewelleryProducts, setJewelleryProducts] = useState<Product[]>([]);
     const [topSellerProduct, setTopSellerProduct] = useState<Product[]>([]);
@@ -92,7 +109,29 @@ const Home = () => {
     console.log("recentlyViewedData", recentlyViewedData)
 
     const topSellerRef = useRef<FlatList<any>>(null);
+    console.log("topSellerProduct", topSellerProduct)
     const jewelleryRef = useRef<FlatList<any>>(null);
+
+    const [isSearchActive, setIsSearchActive] = useState(false);
+
+
+    // const navigation = useNavigation<NavigationProp<ParamListBase>>();
+
+    const navigation = useNavigation<any>();
+
+
+
+    const handleMenuPress = () => {
+        openDrawer();
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            setIsSearchActive(false);
+            setSearchText('');
+        }, [])
+    );
+
 
 
 
@@ -138,7 +177,7 @@ const Home = () => {
                 setTrendingProducts(data.slice(0, 8));
             })
             .catch((error: any) => {
-              console.error('Failed to load trending collection', error);
+                console.error('Failed to load trending collection', error);
             });
     }, []);
 
@@ -181,7 +220,7 @@ const Home = () => {
 
                 setTopSellerProduct(combined);
             } catch (error) {
-                 console.log("homepagecatch")
+                console.log("homepagecatch")
                 console.error("Error fetching top seller products", error);
             }
         };
@@ -260,7 +299,7 @@ const Home = () => {
 
             if (data.length > 0) {
                 const firstProduct = data[0];
-                navigation.navigate('CategoriesProduct', {
+                navigations.navigate('CategoriesProduct', {
                     categoryId: firstProduct.categoryId,
                     categoryName: firstProduct.categoryName,
                     searchProduct: data,
@@ -301,40 +340,51 @@ const Home = () => {
 
     return (
         <View style={styles.container} >
+
             <UnifiedHeader
                 title="WonderCart"
                 showMenuButton={true}
-                onMenuPress={() => {
-                    // Navigate to Profile tab which has drawer navigation
-                    navigation.navigate('Profile');
-                }}
-                showSearch={true}
+                // onMenuPress={() => {
+                //     if (navigationRef.isReady() && navigationRef.current) {
+                //         navigationRef.current.dispatch(DrawerActions.openDrawer());
+                //     }
+                // }}
+                onMenuPress={() => navigation.navigate("Profile")}
+                // onMenuPress={() => {
+                //     if (navigationRef.isReady()) {
+                //         navigationRef.dispatch(DrawerActions.openDrawer());
+                //     }
+                // }}
+
+
                 showWishlist={true}
                 searchText={searchText}
                 onSearchChange={setSearchText}
                 onSearchSubmit={() => {
-                    if (searchText.trim()) {
-                        handleSearch();
-                    }
+                    if (searchText.trim()) handleSearch();
                 }}
-                onWishlistPress={() => navigation.navigate("Wishlist" as never)}
-                headerStyle="home"
+                onSearchToggle={() => setIsSearchActive(!isSearchActive)}
+                onWishlistPress={() => navigations.navigate('Wishlist' as never)}
+                isSearchActive={isSearchActive}
+                headerStyle="default"
             />
 
 
-            {/* Modern Header Section */}
-            <View style={styles.modernHeader}>
-                <View style={styles.headerContent}>
-                    <View style={styles.greetingSection}>
-                        <Text style={styles.modernGreeting}>{getGreeting()}</Text>
-                        {userName ? (
-                            <Text style={styles.modernUserName}>{userName} ✨</Text>
-                        ) : (
-                            <Text style={styles.modernUserName}>Welcome to WonderCart ✨</Text>
-                        )}
-                        {/* <Text style={styles.modernSubText}>Discover amazing products tailored for you</Text> */}
-                    </View>
-                    {/* <View style={styles.headerActions}>
+            < ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContainer} >
+
+                {/* Modern Header Section */}
+                <View style={styles.modernHeader} >
+                    <View style={styles.headerContent}>
+                        <View style={styles.greetingSection}>
+                            <Text style={styles.modernGreeting}>{getGreeting()}</Text>
+                            {userName ? (
+                                <Text style={styles.modernUserName}>{userName} ✨</Text>
+                            ) : (
+                                <Text style={styles.modernUserName}>Welcome to WonderCart ✨</Text>
+                            )}
+                            {/* <Text style={styles.modernSubText}>Discover amazing products tailored for you</Text> */}
+                        </View>
+                        {/* <View style={styles.headerActions}>
                         <TouchableOpacity
                             style={styles.notificationButton}
                             onPress={() =>
@@ -348,48 +398,47 @@ const Home = () => {
                         </TouchableOpacity>
 
                     </View> */}
+                    </View>
                 </View>
-            </View>
 
-            {/* Modern Action Buttons */}
-            <View style={styles.modernActionRow}>
-                {[
-                    { label: 'My Orders', icon: 'package-variant', color: '#4CAF50' },
-                    { label: 'Address', icon: 'map-marker', color: '#2196F3' },
-                    { label: 'Offers', icon: 'tag', color: '#FF9800' },
-                    { label: 'Support', icon: 'headset', color: '#9C27B0' },
-                ].map((item, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={styles.modernActionButton}
-                        onPress={() => {
-                            switch (item.label) {
-                                case 'My Orders':
-                                    navigation.navigate('Orders' as never);
-                                    break;
-                                case 'Address':
-                                    navigation.navigate('DeliveryAddress' as never);
-                                    break;
-                                case 'Offers':
-                                    navigation.navigate('Offers' as never);
-                                    break;
-                                case 'Support':
-                                    navigation.navigate('Support' as never);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }}
-                    >
-                        <View style={[styles.actionIconContainer, { backgroundColor: item.color + '20' }]}>
-                            <MaterialCommunityIcons name={item.icon as any} size={24} color={item.color} />
-                        </View>
-                        <Text style={styles.modernActionText}>{item.label}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+                {/* Modern Action Buttons */}
+                <View style={styles.modernActionRow}>
+                    {[
+                        { label: 'My Orders', icon: 'package-variant', color: '#4CAF50' },
+                        { label: 'Address', icon: 'map-marker', color: '#2196F3' },
+                        { label: 'Offers', icon: 'tag', color: '#FF9800' },
+                        { label: 'Support', icon: 'headset', color: '#9C27B0' },
+                    ].map((item, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.modernActionButton}
+                            onPress={() => {
+                                switch (item.label) {
+                                    case 'My Orders':
+                                        navigations.navigate('Orders' as never);
+                                        break;
+                                    case 'Address':
+                                        navigations.navigate('DeliveryAddress' as never);
+                                        break;
+                                    case 'Offers':
+                                        navigations.navigate('Offers' as never);
+                                        break;
+                                    case 'Support':
+                                        navigations.navigate('Support' as never);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }}
+                        >
+                            <View style={[styles.actionIconContainer, { backgroundColor: item.color + '20' }]}>
+                                <MaterialCommunityIcons name={item.icon as any} size={24} color={item.color} />
+                            </View>
+                            <Text style={styles.modernActionText}>{item.label}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
 
-            < ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContainer} >
 
 
                 {/* Modern Shop By Category Section */}
@@ -403,8 +452,7 @@ const Home = () => {
 
                 <Image source={require('../assets/images/banner.png')} style={styles.banner} />
 
-                <View style={styles.topSellerContainer}>
-                    {/* Modern Top Seller Header */}
+                {/* <View style={styles.topSellerContainer}>
                     <View style={styles.modernTopSellerHeader}>
                         <View style={styles.topSellerTitleSection}>
                             <Text style={styles.modernTopSellerTitle}>🏆 Top Seller</Text>
@@ -458,13 +506,12 @@ const Home = () => {
                         }}
                     />
 
-                </View>
+                </View> */}
 
 
-                < BannerCarousel image={images} />
 
                 {/* Modern Trending Section */}
-                <View style={styles.modernTrendingContainer}>
+                {/* <View style={styles.modernTrendingContainer}>
                     <View style={styles.modernTrendingHeader}>
                         <View style={styles.trendingTitleSection}>
                             <Text style={styles.modernTrendingTitle}>🔥 Trending on Sale!</Text>
@@ -513,12 +560,134 @@ const Home = () => {
                             </TouchableOpacity>
                         )}
                     />
+                </View> */}
+
+                <View
+
+
+                    style={styles.topSellerContainer}>
+                    <LinearGradient
+                        colors={['#E4F4FF', '#FFFFFF']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        style={styles.gradientBackground}
+                    >
+                        <View style={styles.tobsubConatiner}>
+                            <Text style={styles.sectionTitle}> Top Seller </Text>
+
+                            <TouchableOpacity
+                                style={styles.viewAllBtn}
+                                onPress={() => navigations.navigate("TopSellerProduct", { topSellerProduct })}
+                            >
+                                {/* <Text style={styles.viewAllText}> View All </Text> */}
+                                <AntDesign name="right" color="#666666" size={18} />
+
+                            </TouchableOpacity>
+
+                        </View>
+                        < Text style={styles.sectionText} > Discover products loved by many </Text>
+
+
+                        < FlatList
+                            ref={topSellerRef}
+                            data={topSellerProduct}
+                            extraData={topSellerProduct}
+                            horizontal
+                            keyExtractor={(item) => item.productId.toString()}
+                            showsHorizontalScrollIndicator={false}
+                            getItemLayout={(data, index) => ({
+                                length: ITEM_WIDTH,
+                                offset: ITEM_WIDTH * index,
+                                index,
+                            })}
+                            renderItem={({ item }) => {
+                                const imageUrl = item.variants?.variantImage?.[0]?.imageUrl ?? "";
+                                const variantId = item.variants?.variantId
+
+                                return (
+                                    <TouchableOpacity onPress={() =>
+                                        navigations.navigate("SeparateProductPage", {
+                                            productId: item.productId,
+                                        })
+                                    }>
+                                        <Product
+                                            productId={item.productId}
+                                            image={
+                                                getProductThumbnail(item)
+                                                    ? [{ uri: getProductThumbnail(item) }]
+                                                    : item.variants?.variantImage?.length > 0
+                                                        ? [{ uri: item.variants.variantImage[0].imageUrl }]
+                                                        : []
+                                            } productName={item.title}
+                                            price={item.variants?.price ?? 0}
+                                            variantId={variantId}
+                                            description={item.description}
+
+                                        />
+                                    </TouchableOpacity>
+                                );
+                            }}
+                        />
+                    </LinearGradient>
+
+                </View>
+
+                < BannerCarousel image={images} />
+
+                <Text style={styles.sectionTitle}> Trending on Sale! </Text>
+
+                <View style={styles.rowContainer}>
+                    <View style={styles.containerBox}>
+                        <View style={styles.grid}>
+                            {
+                                firstGroup.map((item) => (
+                                    <TouchableOpacity
+                                        key={item.productId}
+                                        style={styles.card}
+                                        onPress={() =>
+                                            navigations.navigate("SeparateProductPage", {
+                                                productId: item.productId,
+                                            })
+                                        } activeOpacity={0.8}
+                                    >
+                                        <Image
+                                            source={{ uri: item.variants?.variantImage?.[0]?.imageUrl }}
+                                            style={styles.image}
+                                        />
+                                        <Text style={styles.productName} numberOfLines={2}> {item.title} </Text>
+                                    </TouchableOpacity>
+                                ))}
+                        </View>
+                    </View>
+
+                    < View style={styles.containerBox} >
+                        <View style={styles.secondGrid}>
+                            {
+                                secondGroup.map((item) => (
+                                    <TouchableOpacity
+                                        key={item.productId}
+                                        style={styles.card}
+                                        onPress={() =>
+                                            navigations.navigate("SeparateProductPage", {
+                                                productId: item.productId,
+                                            })
+                                        }
+                                        activeOpacity={0.8}
+                                    >
+                                        <Image
+                                            source={{ uri: item.variants?.variantImage?.[0]?.imageUrl }}
+                                            style={styles.image}
+                                        />
+                                        <Text style={styles.productName} numberOfLines={2}> {item.title} </Text>
+                                    </TouchableOpacity>
+                                ))}
+                        </View>
+                    </View>
                 </View>
 
 
-
+                {/* 
                 < View style={styles.topSellerContainer} >
-                    {/* Enhanced Jewellery Header */}
                     <View style={styles.jewelleryHeader}>
                         <View style={styles.jewelleryTitleContainer}>
                             <Text style={styles.jewelleryTitle}>💎 Jewellery</Text>
@@ -558,7 +727,7 @@ const Home = () => {
 
 
 
-                </View>
+                </View> */}
                 {/* <View >
                     <BannerCarousel image={banner2} />
                 </View>
@@ -569,12 +738,66 @@ const Home = () => {
 
                 {/* <BannerCarousel image={banner3} />
                 <Text style={styles.bottomTitle}>See More Items</Text> */}
+
+                < View style={styles.topSellerContainer} >
+                    <LinearGradient
+                        colors={['#F5DEB3', '#FFFFFF']}
+
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        style={styles.gradientBackground}
+                    >
+                        <View style={styles.tobsubConatiner}>
+                            <Text style={styles.sectionTitle}> Jewellery </Text>
+
+
+                            < TouchableOpacity
+                                style={styles.viewAllBtn}
+                                onPress={() => navigations.navigate("JewelleryProduct", { JewelleryProducts })}
+                            >
+                                {/* <Text style={styles.viewAllText}> View All </Text> */}
+                                <AntDesign name="right" color="#666666" size={18} style={styles.icon} />
+
+                            </TouchableOpacity>
+
+                        </View>
+                        < Text style={styles.sectionText} > Complete Your Look with Stunning Jewellery </Text>
+
+
+                        < FlatList
+                            ref={jewelleryRef}
+                            data={JewelleryProducts}
+                            extraData={JewelleryProducts}
+                            horizontal
+                            keyExtractor={(item) => item.productId.toString()}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({ item }) => {
+                                const imageUrl = item.variants?.variantImage?.[0]?.imageUrl ?? "";
+                                const variantId = item.variants?.variantId
+
+                                return (
+
+                                    <TopSeller
+                                        productId={item.productId}
+                                        image={imageUrl}
+                                        productName={item.title}
+                                        price={item.variants?.price ?? 0}
+                                        variantId={variantId}
+                                    />
+                                );
+                            }}
+                        />
+
+
+                    </LinearGradient>
+
+                </View>
                 {
                     recentlyViewedData.length > 0 && (
                         <>
                             <View style={styles.rowContainer}>
                                 <Text style={styles.text}> Recently Viewed </Text>
-                                < TouchableOpacity onPress={() => navigation.navigate("RecentlyViewedAllProduct")
+                                < TouchableOpacity onPress={() => navigations.navigate("RecentlyViewedAllProduct")
                                 }>
                                     <Text style={styles.viewAll}> View All </Text>
                                 </TouchableOpacity>
@@ -624,8 +847,8 @@ const styles = StyleSheet.create({
     icon: {
         top: 5,
         backgroundColor: "#FFF",
-        padding: 5,
-        borderRadius: 50,
+        // padding: 3,
+        borderRadius: 60,
         elevation: 2
     },
     title: {
@@ -713,11 +936,12 @@ const styles = StyleSheet.create({
         width: '95%',
         height: 120,
         borderRadius: 10,
-        marginVertical: 15,
+        marginVertical: 12,
         resizeMode: 'cover',
-        margin: 8,
+        // margin: 8,
         marginLeft: 12,
-        marginRight: 12
+        marginRight: 12,
+        top: -5
     },
     cardContainer: {
         flexDirection: 'row',
@@ -768,7 +992,8 @@ const styles = StyleSheet.create({
         padding: 6,
         margin: 0,
         width: "100%",
-        
+
+
     },
     tobsubConatiner: {
         flexDirection: "row",
@@ -793,22 +1018,26 @@ const styles = StyleSheet.create({
         fontWeight: 400,
         paddingLeft: 17,
         paddingTop: 0,
+        paddingBottom: 3,
+        top: -3
     },
     rowContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        marginBottom: 20,
+        padding: 8,
+
+        // paddingHorizontal: 12,
+        // paddingVertical: 12,
+        // marginBottom: 20,
     },
     containerBox: {
         width: '48%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        borderRadius: 12,
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 4,
+        // elevation: 3,
+        // borderRadius: 12,
     },
     bottomText: {
         paddingLeft: 12,
@@ -820,13 +1049,8 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         backgroundColor: "#E3F2FF",
-        padding: 12,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
+        padding: 10,
+        borderRadius: 12
     },
     secondGrid: {
         flexDirection: 'row',
@@ -834,32 +1058,21 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         backgroundColor: "#FFE3F1",
         borderRadius: 12,
-        padding: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
+        padding: 10,
+
     },
     card: {
         width: '49%',
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        marginBottom: 8,
-        padding: 10,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        // backgroundColor: '#fff',
+        borderRadius: 10,
+        marginBottom: 10,
+        padding: 8,
+        // elevation: 2,
     },
     image: {
-        width: 70,
-        height: 70,
-        borderRadius: 10,
-        marginBottom: 8,
-        resizeMode: 'cover',
+        width: '123%',
+        height: 60,
+        borderRadius: 8,
     },
 
     discount: {
@@ -877,7 +1090,9 @@ const styles = StyleSheet.create({
         textAlign: "center",
         lineHeight: 14,
         marginTop: 4,
+        flexShrink: 1, // optional, helps text shrink to fit
     },
+
 
     // New Trending Section Styles
     trendingSectionContainer: {
@@ -1108,8 +1323,8 @@ const styles = StyleSheet.create({
     modernActionRow: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        paddingVertical: 20,
-        paddingHorizontal: 16,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
         backgroundColor: '#FFFFFF',
         marginHorizontal: 16,
         marginTop: -22,
@@ -1119,7 +1334,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,
-        marginBottom:3
+        marginBottom: 3
     },
     modernActionButton: {
         alignItems: 'center',
@@ -1321,8 +1536,8 @@ const styles = StyleSheet.create({
     // Modern Category Section Styles
     modernCategoryContainer: {
         backgroundColor: '#FFFFFF',
-        marginHorizontal: 16,
-        marginVertical: 20,
+        marginHorizontal: 15,
+        marginVertical: 12,
         borderRadius: 20,
         paddingVertical: 24,
         shadowColor: '#000',
@@ -1333,7 +1548,7 @@ const styles = StyleSheet.create({
     },
     modernCategoryHeader: {
         paddingHorizontal: 20,
-        marginBottom: 16,
+        marginBottom: 12,
     },
     modernCategoryTitle: {
         fontSize: 24,
@@ -1496,13 +1711,16 @@ const styles = StyleSheet.create({
         bottom: -12
     },
     viewAllBtn: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         borderWidth: 1,
         borderColor: "#ccc",
-        borderRadius: 20,
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-        alignSelf: "flex-start",
+        backgroundColor: "#FFFFFF",
+        alignItems: "center",
+        justifyContent: "center",
     },
+
     viewAllText: {
         fontSize: 12,
         color: "#555",

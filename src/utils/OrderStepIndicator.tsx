@@ -31,9 +31,11 @@ const OrderStepIndicator = ({ currentStep }: Props) => {
             {index !== steps.length - 1 && (
               <View style={[
                 styles.line,
-                currentStep > step ? styles.completedLine : styles.incompleteLine
+                currentStep > step ? styles.completedLine : styles.incompleteLine,
+                { position: 'absolute', top: 24, left: '78%', right: '-50%' }
               ]} />
             )}
+
             <Text style={[styles.label, isActive && styles.activeLabel]}>
               {label}
             </Text>
@@ -95,11 +97,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   line: {
-    flex: 1,
     height: 2,
-    marginHorizontal: 4,
-    marginTop: -1,
+    // marginTop: -1,
+    borderRadius: 1,     
+    width: 60,            
+    marginHorizontal: 8,   
   },
+
   completedLine: {
     backgroundColor: '#4CAF50',
   },

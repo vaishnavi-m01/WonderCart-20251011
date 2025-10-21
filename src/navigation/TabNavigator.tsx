@@ -8,7 +8,6 @@ import Home from '../tabs/Home';
 import Category from '../tabs/Categories';
 import Cart from '../tabs/Cart';
 import Notification from '../tabs/Notification';
-import Profile from '../tabs/Profile';
 import ProfileDrawer from './ProfileDrawer';
 
 const Tab = createBottomTabNavigator();
@@ -75,10 +74,8 @@ const TabNavigator = () => {
       <Tab.Screen name="Cart" component={Cart} options={{ tabBarLabel: 'Cart' }} />
       <Tab.Screen name="Notification" component={Notification} options={{ tabBarLabel: 'Notification' }} />
       {/* <Tab.Screen name="Profile" component={Profile} options={{ tabBarLabel: 'Profile' }} /> */}
-      <Tab.Screen
-        name="Profile"
-        component={ProfileDrawer}
-      />
+      <Tab.Screen name="Profile" component={ProfileDrawer} options={{ lazy: false }} />
+
     </Tab.Navigator>
   );
 };

@@ -70,6 +70,9 @@ export type RootStackParamList = {
         category: string;
         product?: any;
     };
+    ReviewFullImage: {
+        review: ReviewType;
+    };
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ProductDetails'>;
@@ -94,16 +97,24 @@ interface Props {
     onVariantChange?: (variant: { image: string; price: number; variantId: string }) => void;
 };
 
+type ReviewImageType = {
+    id: number;
+    imageUrl: string;
+    productReviewId: number;
+};
+
 type ReviewType = {
     productReviewId: number;
     productId: number;
     variantId: number;
     userId: number;
+    username: string;
     rating: number;
     reviewText: string;
     createdAt: string;
-    username: string;
+    imagesList?: ReviewImageType[];
 };
+
 
 type ProductItem = {
     productId: number;
@@ -139,7 +150,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
     const destination = buyNowTarget ?? 'ProductDetails';
     const [isFavorite, setIsFavorite] = useState(false);
     const { addToCart } = useCart();
-    
+
     // Animation values
     const fadeAnim = useState(new Animated.Value(0))[0];
     const slideAnim = useState(new Animated.Value(50))[0];
@@ -150,12 +161,12 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
     const [images, setImages] = useState<ImageSourcePropType[]>(() => {
         // Try to get variant images first
         const variantImages = variants?.[0]?.variantImage?.map((img: any) => ({ uri: img.imageUrl })) ?? [];
-        
+
         // If no variant images, use the main product image array
         if (variantImages.length === 0 && image && image.length > 0) {
             return image;
         }
-        
+
         return variantImages;
     });
     const firstImage = selectedVariant?.variantImage?.[0]?.imageUrl || "";
@@ -179,7 +190,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
     const handleVariantSelect = (index: number) => {
         setSelectedVariantIndex(index);
         const selectedImages = variants?.[index]?.variantImage?.map((img: any) => ({ uri: img.imageUrl })) ?? [];
-        
+
         // If no variant images, keep the current images
         if (selectedImages.length > 0) {
             setImages(selectedImages);
@@ -190,7 +201,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
 
     useEffect(() => {
         fetchSuggestedProducts();
-        
+
         // Start animations
         Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -515,7 +526,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
 
     const fetchReviews = async () => {
         try {
-            const res = await apiClient.get(`v1/productReview/variant/${variantId}`);
+            const res = await apiClient.get(`v1/productReview?productId=${productId}&variantId=${variantId}`);
             setReviews(res.data || []);
         } catch (err) {
             ToastAndroid.show('Failed to load reviews', ToastAndroid.SHORT);
@@ -537,74 +548,49 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
     return (
         <SafeAreaView style={styles.container} edges={['bottom']}>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
-                {/* Enhanced Product Header */}
-                <Animated.View 
+
+                <Text style={styles.title}>{productName}</Text>
+                <Text style={styles.description}>{description}</Text>
+
+                <Animated.View
                     style={[
-                        styles.enhancedHeader,
+                        styles.animatedViewContainer,
                         {
                             opacity: fadeAnim,
-                            transform: [
-                                { translateY: slideAnim },
-                                { scale: scaleAnim }
-                            ]
+                            transform: [{ translateY: slideAnim }],
                         }
-                    ]}
-                >
-                    <Text style={styles.enhancedTitle}>{productName}</Text>
-                    <Text style={styles.enhancedDescription}>{description}</Text>
-                </Animated.View>
+                    ]}>
+                    <FlatList
+                        key={productId}
+                        data={images}
+                        horizontal
+                        pagingEnabled
+                        snapToInterval={width}
+                        decelerationRate="fast"
+                        showsHorizontalScrollIndicator={false}
+                        keyExtractor={(_, index) => index.toString()}
+                        onMomentumScrollEnd={(e) => {
+                            const index = Math.round(e.nativeEvent.contentOffset.x / width);
+                            setActiveIndex(index);
+                        }}
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity
+                                activeOpacity={0.9}
+                                onPress={() => navigation.navigate('FullScreenImage', { images, index })}
+                            >
+                                <Image
+                                    source={typeof item === 'string' ? { uri: item } : item}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
 
-                {/* Enhanced Image Carousel */}
-                <Animated.View 
-                    style={[
-                        styles.enhancedCarouselContainer,
-                        {
-                            opacity: fadeAnim,
-                            transform: [{ translateY: slideAnim }]
-                        }
-                    ]}
-                >
-                    {images && images.length > 0 ? (
-                        <FlatList
-                            key={productId}
-                            data={images}
-                            horizontal
-                            pagingEnabled
-                            snapToInterval={width - 30}
-                            decelerationRate="fast"
-                            showsHorizontalScrollIndicator={false}
-                            keyExtractor={(_, index) => index.toString()}
-                            onMomentumScrollEnd={(e) => {
-                                const index = Math.round(e.nativeEvent.contentOffset.x / (width - 30));
-                                setActiveIndex(index);
-                            }}
-                            renderItem={({ item, index }) => (
-                                <TouchableOpacity
-                                    activeOpacity={0.9}
-                                    onPress={() => navigation.navigate('FullScreenImage', { images, index })}
-                                    style={styles.imageContainer}
-                                >
-                                    <Image
-                                        source={typeof item === 'string' ? { uri: item } : item}
-                                        style={styles.enhancedImage}
-                                    />
-                                    <LinearGradient
-                                        colors={['transparent', 'rgba(0,0,0,0.1)']}
-                                        style={styles.imageOverlay}
-                                    />
-                                </TouchableOpacity>
-                            )}
-                        />
-                    ) : (
-                        <View style={styles.placeholderContainer}>
-                            <MaterialIcons name="image" size={80} color="#CCCCCC" />
-                            <Text style={styles.placeholderText}>No Image Available</Text>
-                        </View>
-                    )}
+                            </TouchableOpacity>
+                        )}
+                    />
 
-                    <View style={styles.enhancedPagination}>
+                    <View style={styles.pagination}>
                         {images.map((_, index) => (
-                            <Animated.View
+                            <View
                                 key={index}
                                 style={[
                                     styles.enhancedDot,
@@ -613,54 +599,35 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                             />
                         ))}
                     </View>
-                    
-                    <View style={styles.enhancedIconRow}>
-                        <TouchableOpacity 
-                            style={styles.iconButton}
-                            onPress={handleWishlistToggle}
-                            activeOpacity={0.7}
-                        >
+                    <View style={styles.iconRow}>
+                        <TouchableOpacity onPress={handleWishlistToggle}>
                             {isFavorite ? (
-                                <Foundation name="heart" color="#FF4757" size={24} />
+                                <Foundation name="heart" color="red" size={24} />
                             ) : (
-                                <AntDesign name="hearto" color="#2C3E50" size={24} />
+                                <AntDesign name="hearto" color="#212121" size={24} />
                             )}
                         </TouchableOpacity>
 
-                        <View style={styles.iconButton}>
-                            <ShareComponent productName={productName} description={description} image={images} />
-                        </View>
+                        <ShareComponent productId={productId} productName={productName} description={description} image={images} />
                     </View>
                 </Animated.View>
 
 
 
-                {/* Enhanced Variants Section */}
-                <Animated.View 
-                    style={[
-                        styles.enhancedVariantsSection,
-                        {
-                            opacity: fadeAnim,
-                            transform: [{ translateY: slideAnim }]
-                        }
-                    ]}
-                >
-                    <View style={styles.variantsHeader}>
-                        <MaterialIcons name="palette" size={20} color="#0077CC" />
-                        <Text style={styles.variantsTitle}>Available Options</Text>
-                    </View>
-                    <View style={styles.enhancedVarientcontainer}>
-                        {variants?.map((variant, index) => (
-                            <VarientProduct
-                                key={index}
-                                imageUrl={variant.variantImage?.[0]?.imageUrl}
-                                price={variant.price}
-                                isSelected={selectedVariantIndex === index}
-                                onPress={() => handleVariantSelect(index)}
-                            />
-                        ))}
-                    </View>
-                </Animated.View>
+                <Text style={styles.productName}>{productName}</Text>
+
+                <View style={styles.Varientcontainer}>
+                    {variants?.map((variant, index) => (
+                        <VarientProduct
+                            key={index}
+                            imageUrl={variant.variantImage?.[0]?.imageUrl}
+                            price={variant.price}
+                            isSelected={selectedVariantIndex === index}
+                            onPress={() => handleVariantSelect(index)}
+                        />
+                    ))}
+
+                </View>
 
 
                 {categoryName === 'Cloths' && (
@@ -680,36 +647,14 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
 
 
 
-                {/* Enhanced Price and Rating Section */}
-                <Animated.View 
-                    style={[
-                        styles.enhancedPriceSection,
-                        {
-                            opacity: fadeAnim,
-                            transform: [{ translateY: slideAnim }]
-                        }
-                    ]}
-                >
-                    <View style={styles.ratingSection}>
-                        <View style={styles.starContainer}>
-                            <Entypo name="star" color="#FFD700" size={18} />
-                            <Text style={styles.enhancedReview}>4.2</Text>
-                        </View>
-                        <Text style={styles.reviewCount}>(3,243 Reviews)</Text>
+                <View style={styles.amountContainer}>
+                    <Entypo name="star" color="#FFE70C" size={15} />
+                    <Text style={styles.review}>4.2 (3243 Reviews)</Text>
+                    <View style={styles.right}>
+                        <Text style={styles.offer}>{discount}%</Text>
+                        <Text style={styles.price}>₹{selectedVariant.price}</Text>
                     </View>
-                    
-                    <View style={styles.priceSection}>
-                        {discount && discount > 0 && (
-                            <View style={styles.discountBadge}>
-                                <Text style={styles.discountText}>{discount}% OFF</Text>
-                            </View>
-                        )}
-                        <Text style={styles.enhancedPrice}>₹{selectedVariant.price}</Text>
-                        {originalPrice && originalPrice > selectedVariant.price && (
-                            <Text style={styles.originalPrice}>₹{originalPrice}</Text>
-                        )}
-                    </View>
-                </Animated.View>
+                </View>
                 <Text style={styles.header}>Description</Text>
                 <Text style={styles.bottomDescription}>{description}</Text>
 
@@ -753,40 +698,56 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
  */}
 
                 {/* Enhanced Reviews Section */}
-                <Animated.View 
-                    style={[
-                        styles.enhancedReviewsSection,
-                        {
-                            opacity: fadeAnim,
-                            transform: [{ translateY: slideAnim }]
-                        }
-                    ]}
-                >
-                    <View style={styles.reviewsHeader}>
-                        <View style={styles.reviewsHeaderLeft}>
-                            <MaterialIcons name="rate-review" size={24} color="#0077CC" />
-                            <Text style={styles.reviewsHeaderTitle}>Customer Reviews</Text>
-                        </View>
-                        <TouchableOpacity 
-                            onPress={() => setModalVisible(true)} 
-                            style={styles.writeReviewButton}
-                        >
-                            {/* <MaterialIcons name="edit" size={16} color="#FFFFFF" /> */}
-                            <Text style={styles.writeReviewButtonText}>Write Review</Text>
-                        </TouchableOpacity>
-                    </View>
 
-                    {visibleReviews.length > 0 ? (
+                {visibleReviews.length > 0 && (
+                    <Animated.View
+                        style={[
+                            styles.enhancedReviewsSection,
+                            {
+                                opacity: fadeAnim,
+                                transform: [{ translateY: slideAnim }],
+                            },
+                        ]}
+                    >
                         <>
+                            {/* Header */}
+                            <View style={styles.reviewsHeader}>
+                                <View style={styles.reviewsHeaderLeft}>
+                                    <MaterialIcons name="rate-review" size={24} color="#0077CC" />
+                                    <Text style={styles.reviewsHeaderTitle}>Customer Reviews</Text>
+                                </View>
+                            </View>
+
+                            {/* Reviews List */}
                             {visibleReviews.map((review) => (
                                 <View key={review.productReviewId} style={styles.enhancedReviewCard}>
+                                    {/* --- Review Images (clickable) --- */}
+                                    {review.imagesList && review.imagesList.length > 0 && (
+                                        <ScrollView
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            style={styles.reviewImagesScroll}
+                                            contentContainerStyle={{ paddingVertical: 4 }}
+                                        >
+                                            {review.imagesList.map((imgObj, index) => (
+                                                <TouchableOpacity
+                                                    key={index.toString()}
+                                                    onPress={() =>
+                                                        navigation.navigate('ReviewFullImage', { review })
+                                                    }
+                                                >
+                                                    <Image
+                                                        source={{ uri: imgObj.imageUrl }}
+                                                        style={styles.reviewImage}
+                                                        resizeMode="cover"
+                                                    />
+                                                </TouchableOpacity>
+                                            ))}
+                                        </ScrollView>
+                                    )}
+
                                     <View style={styles.reviewHeader}>
                                         <View style={styles.reviewerInfo}>
-                                            <View style={styles.reviewerAvatar}>
-                                                <Text style={styles.reviewerInitial}>
-                                                    {review.username.charAt(0).toUpperCase()}
-                                                </Text>
-                                            </View>
                                             <View style={styles.reviewerDetails}>
                                                 <View style={styles.reviewerNameRow}>
                                                     <Text style={styles.enhancedReviewerName}>{review.username}</Text>
@@ -798,44 +759,43 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                                                 <StarDisplay rating={review.rating} />
                                             </View>
                                         </View>
+
                                         <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
                                     </View>
+
                                     <Text style={styles.enhancedReviewText}>{review.reviewText}</Text>
                                 </View>
                             ))}
 
+
+
+                            {/* Load More Button */}
                             {reviews.length > 3 && !showAll && (
                                 <TouchableOpacity onPress={() => setShowAll(true)} style={styles.loadMoreReviewsButton}>
-                                    <Text style={styles.loadMoreReviewsText}>Load More Reviews ({reviews.length - 3} remaining)</Text>
+                                    <Text style={styles.loadMoreReviewsText}>
+                                        Load More Reviews ({reviews.length - 3} remaining)
+                                    </Text>
                                     <MaterialIcons name="keyboard-arrow-down" size={20} color="#0077CC" />
                                 </TouchableOpacity>
                             )}
                         </>
-                    ) : (
-                        <View style={styles.noReviewsContainer}>
-                            <MaterialIcons name="rate-review" size={48} color="#CCCCCC" />
-                            <Text style={styles.noReviewsTitle}>No Reviews Yet</Text>
-                            <Text style={styles.noReviewsSubtitle}>Be the first to review this product</Text>
-                            <TouchableOpacity 
-                                onPress={() => setModalVisible(true)} 
-                                style={styles.writeFirstReviewButton}
-                            >
-                                <Text style={styles.writeFirstReviewButtonText}>Write First Review</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                    </Animated.View>
+                )}
 
-                    <WriteReviewModal
-                        visible={modalVisible}
-                        onClose={() => {
-                            setModalVisible(false);
-                            fetchReviews();
-                        }}
-                        productId={productId}
-                        variantId={productId}
-                        userId={userId ?? null}
-                    />
-                </Animated.View>
+                {/* Write Review Modal always mounted */}
+                {/* <WriteReviewModal
+                    visible={modalVisible}
+                    onClose={() => {
+                        setModalVisible(false);
+                        fetchReviews();
+                    }}
+                    productId={productId}
+                    variantId={productId}
+                    userId={userId ?? null}
+                /> */}
+
+
+
                 {/* <Text style={styles.originalAmount}>₹{originalPrice}</Text> */}
 
 
@@ -870,7 +830,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
             </ScrollView>
 
             {/* Enhanced Bottom Buttons */}
-            <View style={[styles.enhancedBottomButtons, { paddingBottom: insets.bottom || 16 }]}>
+            <View style={[styles.enhancedBottomButtons, { paddingBottom: insets.bottom || 12 }]}>
                 <TouchableOpacity
                     style={styles.enhancedCartBtn}
                     onPress={handleClick}
@@ -934,6 +894,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8FAFC',
+        paddingHorizontal: 8,
+        paddingTop: 15
+    },
+    animatedViewContainer: {
+        width: '100%',
+        borderRadius: 20,
+        borderColor: "#D9D9D9",
+        borderWidth: 1,
+        overflow: 'hidden',
+    },
+    productImage: {
+        width: 50,
+        height: 60,
+        borderRadius: 6,
+        marginRight: 10,
     },
     // Enhanced Header Styles
     enhancedHeader: {
@@ -963,6 +938,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#666666',
         lineHeight: 24,
+        // marginLeft:8
     },
     // Enhanced Carousel Styles
     enhancedCarouselContainer: {
@@ -978,7 +954,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: 'rgba(0, 119, 204, 0.08)',
-        paddingTop:8
+        paddingTop: 8
     },
     imageContainer: {
         position: 'relative',
@@ -1140,17 +1116,16 @@ const styles = StyleSheet.create({
     // Enhanced Bottom Buttons
     enhancedBottomButtons: {
         flexDirection: 'row',
-        paddingHorizontal: 20,
-        paddingTop: 16,
-        backgroundColor: '#FFFFFF',
+        justifyContent: 'space-between',
+        padding: 10,
+        backgroundColor: 'white',
         borderTopWidth: 1,
-        borderTopColor: '#E5E7EB',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 8,
+        borderColor: '#ccc',
+        position: 'absolute',
+        bottom: 3,
+        width: '100%',
         gap: 12,
+
     },
     enhancedCartBtn: {
         flex: 1,
@@ -1205,10 +1180,11 @@ const styles = StyleSheet.create({
     },
     description: {
         fontWeight: "600",
-        fontSize: 12,
+        fontSize: 14,
         paddingLeft: 5,
         color: "#666666",
-        paddingTop: 8,
+        paddingVertical: 8,
+        marginBottom: 6
     },
     carouselContainer: {
         marginTop: 10,
@@ -1218,17 +1194,15 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     image: {
-        width: width - 15,
-        height: 200,
-        borderRadius: 10,
-        marginRight: 2,
-        // resizeMode: 'contain',
+        width: width - 18,
+        height: 290,
+        borderRadius: 12,
     },
-
     pagination: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginTop: 10,
+        gap: 6
     },
     dot: {
         width: 8,
@@ -1259,6 +1233,10 @@ const styles = StyleSheet.create({
         marginTop: 2,
         alignItems: 'center'
     },
+    reviewImagesScroll: {
+        marginVertical: 8,
+        marginTop: -12,
+    },
     review: {
         paddingLeft: 4,
         color: "#666666",
@@ -1288,7 +1266,7 @@ const styles = StyleSheet.create({
         paddingRight: 14,
     },
     header: {
-        paddingLeft: 10,
+        paddingLeft: 8,
         color: "#2A2A2A",
         fontWeight: "800",
         fontSize: 16,
@@ -1299,8 +1277,9 @@ const styles = StyleSheet.create({
     bottomDescription: {
         fontWeight: "600",
         fontSize: 12,
-        paddingLeft: 10,
+        paddingLeft: 8,
         color: "#666666",
+        paddingVertical: 8
     },
     addToCartBtn: {
         backgroundColor: "#E3F2FF",
@@ -1330,7 +1309,8 @@ const styles = StyleSheet.create({
     Varientcontainer: {
         flexDirection: 'row',
         gap: 16,
-        padding: 10,
+        paddingTop: 12,
+        // padding: 8,
     },
     subcontainer: {
         marginTop: 10
@@ -1492,19 +1472,20 @@ const styles = StyleSheet.create({
     },
     // Enhanced Reviews Section Styles
     enhancedReviewsSection: {
-        marginHorizontal: 8,
+        marginHorizontal: 2,
         marginVertical: 12,
         backgroundColor: '#FFFFFF',
         borderRadius: 20,
         padding: 20,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        elevation: 8,
-        borderWidth: 1,
-        borderColor: 'rgba(0, 119, 204, 0.05)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+        borderWidth: 0,
     },
+
+
     reviewsHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -1539,7 +1520,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8FAFC',
         borderRadius: 16,
         padding: 16,
-        marginBottom: 12,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: '#E5E7EB',
     },
@@ -1566,6 +1547,19 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '700',
+    },
+    reviewImagesContainer: {
+        flexDirection: 'row',
+        marginBottom: 6,
+        gap: 6,
+    },
+    reviewImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 8,
+        marginRight: 8,
+        borderWidth: 0.5,
+        borderColor: '#ccc',
     },
     reviewerDetails: {
         flex: 1,

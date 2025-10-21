@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
   Platform,
 } from "react-native";
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Card from "../components/categories/Card";
 import apiClient from "../services/apiBaseUrl";
@@ -80,6 +80,7 @@ const Categories = () => {
   const [searchText, setSearchText] = useState('');
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [trendingProducts, setTrendingProducts] = useState<ProductType[]>([]);
+  console.log("trendingProducts", trendingProducts)
   const [refreshing, setRefreshing] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [trendingLoading, setTrendingLoading] = useState(true);
@@ -99,6 +100,12 @@ const Categories = () => {
   const screenWidth = Dimensions.get('window').width;
   const cardWidth = (screenWidth - 40) / 2;
 
+  useFocusEffect(
+    useCallback(() => {
+      setIsSearchActive(false);
+      setSearchText('');
+    }, [])
+  );
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -345,32 +352,61 @@ const Categories = () => {
     );
   }
 
-
-
-
   return (
     <View style={styles.container}>
       <UnifiedHeader
         title="Categories"
         showMenuButton={true}
-        onMenuPress={() => {
-          // Navigate to Profile tab which has drawer navigation
-          navigation.navigate('Profile' as never);
-        }}
+        onMenuPress={() => navigation.navigate('Profile' as never)}
         showSearch={true}
         showWishlist={true}
         searchText={searchText}
         onSearchChange={setSearchText}
         onSearchSubmit={() => {
-          if (searchText.trim()) {
-            handleSearch();
-          }
+          if (searchText.trim()) handleSearch();
         }}
         onSearchToggle={() => setIsSearchActive(!isSearchActive)}
-        onWishlistPress={() => navigation.navigate("Wishlist" as never)}
+        onWishlistPress={() => navigation.navigate('Wishlist' as never)}
         isSearchActive={isSearchActive}
         headerStyle="default"
       />
+      {/* showBackButton={true}
+                showSearch={true}
+                searchText={searchText}
+                onSearchChange={setSearchText}
+                onSearchSubmit={() => {
+                    if (searchText.trim()) {
+                        handleSearch();
+                        setSearchText('');
+                        setIsSearchActive(false);
+                    }
+                }}
+                onSearchToggle={() => setIsSearchActive(!isSearchActive)}
+                onBackPress={handleClick}
+                isSearchActive={isSearchActive}
+                headerStyle="default" */}
+
+      <View style={styles.filterContainer}>
+        {filters.map((filter) => (
+          <TouchableOpacity
+            key={filter.label}
+            style={[
+              styles.filterButton,
+              selectedFilter === filter.label && styles.selectedFilterButton
+            ]}
+            onPress={() => handleFilterPress(filter)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                selectedFilter === filter.label && styles.selectedFilterText
+              ]}
+            >
+              {filter.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <ScrollView
         style={styles.scrollContainer}
@@ -391,110 +427,14 @@ const Categories = () => {
         )}
         scrollEventThrottle={16}
       >
-        {/* Enhanced Filter Section with Parallax */}
-        <Animated.View
-          style={[
-            styles.modernFilterContainer,
-            {
-              opacity: fadeAnim,
-              transform: [
-                { translateY: slideAnim },
-                {
-                  translateY: scrollY.interpolate({
-                    inputRange: [0, 200],
-                    outputRange: [0, -50],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ]
-            }
-          ]}
-        >
-          <View style={styles.filterHeader}>
-            <MaterialIcons name="filter-list" size={22} color="#0077CC" />
-            <Text style={styles.filterTitle}>Quick Filters</Text>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.modernFilterScrollContent}
-          >
-            {filters.map((filter, index) => (
-              <Animated.View
-                key={filter.label}
-                style={[
-                  {
-                    opacity: fadeAnim,
-                    transform: [
-                      {
-                        translateX: slideAnim.interpolate({
-                          inputRange: [0, 50],
-                          outputRange: [0, -20 * index],
-                          extrapolate: 'clamp',
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.modernFilterButton,
-                    selectedFilter === filter.label && styles.modernSelectedFilterButton
-                  ]}
-                  onPress={() => handleFilterPress(filter)}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={[
-                      styles.modernFilterText,
-                      selectedFilter === filter.label && styles.modernSelectedFilterText
-                    ]}
-                  >
-                    {filter.label}
-                  </Text>
-                  {selectedFilter === filter.label && (
-                    <Animated.View
-                      style={{
-                        opacity: fadeAnim,
-                        transform: [
-                          {
-                            scale: fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, 1],
-                              extrapolate: 'clamp',
-                            }),
-                          },
-                        ],
-                      }}
-                    >
-                      <MaterialIcons name="check" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
-                    </Animated.View>
-                  )}
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </ScrollView>
-        </Animated.View>
+
 
         {/* Enhanced Categories Section with Parallax */}
         <Animated.View
-          style={[
-            styles.modernContentContainer,
-            {
-              opacity: fadeAnim,
-              transform: [
-                { translateY: slideAnim },
-                {
-                  translateY: scrollY.interpolate({
-                    inputRange: [0, 300],
-                    outputRange: [0, -30],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ]
-            }
-          ]}
+        // style={[
+        //   styles.modernContentContainer,
+
+        // ]}
         >
           <View style={styles.modernSectionHeader}>
             <View style={styles.modernSectionTitleContainer}>
@@ -596,20 +536,25 @@ const Categories = () => {
         >
           <View style={styles.modernTrendingHeader}>
             <View style={styles.modernTrendingTitleContainer}>
-                <View style={styles.trendingTitleRow}>
-                  <MaterialIcons name="trending-up" size={24} color="#FF6B35" />
-                  <Text style={styles.modernTrendingTitle}>Trending Now</Text>
-                </View>
+              <View style={styles.trendingTitleRow}>
+                <MaterialIcons name="trending-up" size={24} color="#FF6B35" />
+                <Text style={styles.modernTrendingTitle}>Trending Now</Text>
+              </View>
               <Text style={styles.modernTrendingSubtitle}>Popular products everyone loves</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.modernSeeAllButton}
-              onPress={() => navigation.navigate('ProductList' as never)}
-              activeOpacity={0.8}
+
+            <TouchableOpacity
+              style={styles.viewAllBtn}
+              onPress={() => {
+                console.log("Trending Products being passed:", trendingProducts);
+                navigation.navigate("TrendingNow", { trendingProducts });
+              }}
+
             >
-              <Text style={styles.modernSeeAllText}>See All</Text>
-              <AntDesign name="right" color="#fff" size={14} />
+              <AntDesign name="right" color="#666666" size={18} />
+
             </TouchableOpacity>
+
           </View>
 
           {trendingLoading ? (
@@ -675,6 +620,16 @@ const Categories = () => {
 export default Categories;
 
 const styles = StyleSheet.create({
+  viewAllBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   loaderContainer: {
     flex: 1,
     backgroundColor: "#fff",
@@ -700,6 +655,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+  },
+
+  filterContainer: {
+    flexDirection: "row",
+    paddingLeft: 10,
+    gap: 10,
+    marginBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: "#F0F7FF",
+    // borderRadius: 12,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    top: 1
+  },
+
+
+  filterButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f5f5f5",
+  },
+
+  selectedFilterButton: {
+    backgroundColor: "#0094FF",
+    borderColor: "#0094FF",
+  },
+
+  filterText: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
+
+  selectedFilterText: {
+    color: "#fff",
   },
   header: {
     flexDirection: 'row',
@@ -836,12 +833,10 @@ const styles = StyleSheet.create({
   modernSelectedFilterText: {
     color: "#FFFFFF",
   },
-  // Modern Content Styles
   modernContentContainer: {
-    flex: 1,
-    paddingBottom: 100,
-    backgroundColor: '#F8F9FA',
+    paddingBottom: 20,
   },
+
   modernSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -908,12 +903,12 @@ const styles = StyleSheet.create({
   },
   categoriesList: {
     // paddingHorizontal: 8,
-    paddingBottom: 24,
+    paddingBottom: 20,
   },
   categoryItem: {
     width: '50%',
     paddingHorizontal: 2,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   categoryCard: {
     flex: 1,
@@ -954,9 +949,10 @@ const styles = StyleSheet.create({
   },
   // Enhanced Trending Section Styles
   modernTrendingSection: {
+
     backgroundColor: '#FFFFFF',
     marginHorizontal: 8,
-    borderRadius: 24,
+    borderRadius: 12,
     paddingVertical: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
@@ -965,13 +961,15 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 107, 53, 0.05)',
+    // top:-120
+    marginTop: 20
   },
   modernTrendingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   modernTrendingTitleContainer: {
     flex: 1,

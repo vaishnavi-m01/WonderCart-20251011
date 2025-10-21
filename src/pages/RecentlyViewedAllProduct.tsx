@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { View } from "react-native";
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import RecentlyViewed from "../components/home/RecentlyViewed";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,7 +21,7 @@ type RecentlyViewedItem = {
 const RecentlyViewedAllProduct = () => {
     const navigation = useNavigation<any>();
     const [allViewed, setAllViewed] = useState<RecentlyViewedItem[]>([]);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -43,7 +42,7 @@ const RecentlyViewedAllProduct = () => {
             } catch (error) {
                 console.log("Error fetching recently viewed:", error);
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
         };
 
@@ -61,12 +60,12 @@ const RecentlyViewedAllProduct = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.navigate("Main")}>
                     <AntDesign name="arrowleft" color="#0077CC" size={26} style={styles.icon} />
                 </TouchableOpacity>
                 <Text style={styles.text}>Recently View</Text>
-            </View>
+            </View> */}
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 {allViewed.length > 0 ? (
@@ -92,7 +91,8 @@ export default RecentlyViewedAllProduct;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        paddingBottom: 30
     },
     header: {
         flexDirection: 'row',

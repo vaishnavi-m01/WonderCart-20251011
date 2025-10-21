@@ -73,14 +73,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     paddingTop: 8,
+    paddingBottom: 30
+
   },
   list: {
     paddingBottom: 20,
   },
   card: {
     flex: 1,
-    margin: 4,
+    margin: 2,
   },
 });

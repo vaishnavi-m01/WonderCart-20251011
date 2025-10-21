@@ -73,6 +73,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const headerStyles = getHeaderStyles();
 
+
+
   return (
     <View style={[styles.container, headerStyles.container]}>
       <View style={styles.leftSection}>
@@ -95,7 +97,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
         {!isSearchActive && (
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, headerStyles.title]}>{title}</Text>
+            <Text style={[styles.title,]}>{title}</Text>
             {subtitle && (
               <Text style={[styles.subtitle, headerStyles.subtitle]}>{subtitle}</Text>
             )}
@@ -154,8 +156,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingTop: 12,
-    paddingBottom: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
     paddingHorizontal: 20,
     elevation: 12,
     shadowColor: '#000',
@@ -186,7 +188,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#0077CC',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     // color: '#1A1A1A',
     marginBottom: 2,

@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import apiClient from "../../services/apiBaseUrl";
 import Feather from "react-native-vector-icons/Feather";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type RootStackParamList = {
   Main: { screen: string } | undefined;
@@ -101,9 +102,13 @@ const SignIn = () => {
         navigation.navigate("Main", { screen: "Home" });
       }
     } catch (error: any) {
-      console.log("Login error", error?.response?.data || error.message);
-      ToastAndroid.show("Login failed. Please try again.", ToastAndroid.SHORT);
-    } finally {
+      const errorMessage =
+        error?.response?.data || "Login failed. Please try again.";
+
+      console.log("Login error", errorMessage);
+      ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -158,10 +163,12 @@ const SignIn = () => {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={Platform.OS === "ios" ? 20 : 40}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.container}>
           <View style={{ justifyContent: "center", alignItems: "center" }}>
@@ -270,7 +277,7 @@ const SignIn = () => {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -281,11 +288,12 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
+    backgroundColor: "#fff",
   },
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
-    paddingBottom: 20,
+    paddingBottom: 10,
   },
   header: {
     textAlign: "center",

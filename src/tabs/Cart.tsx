@@ -1,4 +1,4 @@
-import { Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AddToCart from "../components/cart/AddToCart";
 import { NavigatorScreenParams, RouteProp, useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import apiClient from "../services/apiBaseUrl";
 import axios from "axios";
 import UnifiedHeader from "../components/common/UnifiedHeader";
+import LinearGradient from "react-native-linear-gradient";
 
 
 interface ProductType {
@@ -77,6 +78,7 @@ type ServerCartItem = {
   cartItemId: number;
   cartId: number;
   productId: number;
+  description?: string;
   variantId: number;
   quantity: number;
   sku?: number;
@@ -120,6 +122,7 @@ const Cart = () => {
   const { cartItems, setCartItems, removeFromCart } = useCart();
 
   const [serverCart, setServerCart] = useState<ServerCartItem[]>([]);
+  console.log("cartItems", serverCart)
   console.log("ServerCART", serverCart)
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -468,7 +471,7 @@ const Cart = () => {
   //   </>
   // );
 
-  // ✅ Items to calculate (if none selected → all items)
+  //  Items to calculate (if none selected → all items)
   const itemsToCalculate = isLoggedIn
     ? (selectedItems.length > 0
       ? serverCart.filter(item => selectedItems.includes(item.cartItemId))
@@ -489,8 +492,13 @@ const Cart = () => {
 
 
   const Summary = () => (
-    <>
-      {/* Show selected items or all items */}
+    // <LinearGradient
+    //   colors={['#e6f0ff','#ffffff',]}
+    //   start={{ x: 0, y: 0 }}
+    //   end={{ x: 1, y: 1 }}
+    //   style={styles.summaryContainer}
+    // >
+    <View style={styles.summaryContainer}>
       <Text style={styles.text}>
         {selectedItems.length > 0
           ? `Selected Items (${selectedItems.length})`
@@ -526,12 +534,11 @@ const Cart = () => {
           <Text style={styles.btnText}>Proceed to Pay</Text>
         </TouchableOpacity>
       </View>
-
-    </>
+    </View>
   );
 
   const Recommendations = () => (
-    <>
+    <View style={{ paddingBottom: 6 }}>
       <Text style={styles.heading}>You Might also like</Text>
       <FlatList
         data={suggestedProducts}
@@ -550,7 +557,7 @@ const Cart = () => {
           />
         )}
       />
-    </>
+    </View>
   );
 
   const EmptyCart = () => (
@@ -568,81 +575,84 @@ const Cart = () => {
 
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', }}>
+
       {!showOrders && !showAddress && !showOffers && !showSupport && !showFAQ && !showTerms && !showPrivacyPolicy && (
         <UnifiedHeader
           title="Cart"
           showMenuButton={true}
           onMenuPress={() => {
             // Navigate to Profile tab which has drawer navigation
-            navigation.navigate('Profile');
+            navigation.navigate('Profile' as never);
           }}
           headerStyle="default"
         />
       )}
+      <View style={styles.container}>
 
-      {
-        loading ? (
-          <Text>Loading...</Text>
-        ) : isLoggedIn && serverCart.length > 0 ? (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {serverCart.map((cart, index) => (
-              <AddToCart
-                key={cart.cartItemId}
-                productId={cart.productId}
-                variantId={cart.variantId}
-                image={cart.imageUrl ?? ""}
-                productName={cart.productName ?? ""}
-                price={cart.price}
-                description={cart.categoryName}
-                originalAmount={cart.price}
-                discount={20}
-                onRemove={() => handleRemoveItem(isLoggedIn ? cart.cartItemId : cart.cartItemId, !isLoggedIn)}
-                isSelected={selectedItems.includes(cart.cartItemId)}
-                onToggle={() => toggleSelection(cart.cartItemId)}
-                quantity={cart.quantity}
-                onQuantityChange={(newQty) => updateServerQuantity(cart.cartItemId, newQty, cart.price)}
-              />
-            ))}
-
-
-            <Summary />
-            <Recommendations />
-          </ScrollView>
-        ) : cartItems.length > 0 ? (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {cartItems.map((cart, index) => (
-              <AddToCart
-                key={cart.productId}
-                id={cart.productId}
-                image={cart.image}
-                productName={cart.productName}
-                productId={cart.productId}
-                variantId={cart.variantId}
-                price={cart.price}
-                description={cart.description}
-                originalAmount={cart.originalPrice}
-                discount={cart.discount}
-                onRemove={() => handleRemoveItem(isLoggedIn ? cart.productId : cart.productId, !isLoggedIn)}
-                isSelected={selectedItems.includes(cart.productId)}
-                onToggle={() => toggleSelection(cart.productId)}
-                quantity={cart.quantity}
-                onQuantityChange={(newQty) => updateLocalQuantity(cart.productId, newQty)}
-              />
-            ))}
-
-            <Summary />
-            <Recommendations />
-
-          </ScrollView>
+        {
+          loading ? (
+            <Text>Loading...</Text>
+          ) : isLoggedIn && serverCart.length > 0 ? (
+            <ScrollView showsVerticalScrollIndicator={false} >
+              {serverCart.map((cart, index) => (
+                <AddToCart
+                  key={cart.cartItemId}
+                  productId={cart.productId}
+                  variantId={cart.variantId}
+                  image={cart.imageUrl ?? ""}
+                  productName={cart.productName ?? ""}
+                  price={cart.price}
+                  description={cart.description}
+                  originalAmount={cart.price}
+                  discount={20}
+                  onRemove={() => handleRemoveItem(isLoggedIn ? cart.cartItemId : cart.cartItemId, !isLoggedIn)}
+                  isSelected={selectedItems.includes(cart.cartItemId)}
+                  onToggle={() => toggleSelection(cart.cartItemId)}
+                  quantity={cart.quantity}
+                  onQuantityChange={(newQty) => updateServerQuantity(cart.cartItemId, newQty, cart.price)}
+                />
+              ))}
 
 
-        ) : (
-          <EmptyCart />
-        )
-      }
+              <Summary />
+              <Recommendations />
+            </ScrollView>
+          ) : cartItems.length > 0 ? (
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {cartItems.map((cart, index) => (
+                <AddToCart
+                  key={cart.productId}
+                  id={cart.productId}
+                  image={cart.image}
+                  productName={cart.productName}
+                  productId={cart.productId}
+                  variantId={cart.variantId}
+                  price={cart.price}
+                  description={cart.description}
+                  originalAmount={cart.originalPrice}
+                  discount={cart.discount}
+                  onRemove={() => handleRemoveItem(isLoggedIn ? cart.productId : cart.productId, !isLoggedIn)}
+                  isSelected={selectedItems.includes(cart.productId)}
+                  onToggle={() => toggleSelection(cart.productId)}
+                  quantity={cart.quantity}
+                  onQuantityChange={(newQty) => updateLocalQuantity(cart.productId, newQty)}
+                />
+              ))}
 
-    </View>
+              <Summary />
+              <Recommendations />
+
+            </ScrollView>
+
+
+          ) : (
+            <EmptyCart />
+          )
+        }
+
+      </View>
+    </SafeAreaView>
 
   );
 };
@@ -652,16 +662,21 @@ export default Cart;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
+    paddingLeft: 3,
+    paddingRight: 3
+
   },
 
   text: {
+    marginTop: 20,
     color: '#0094FF',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '900',
     textAlign: 'left',
     flex: 1,
-    paddingLeft: 12
+    paddingLeft: 12,
+    marginBottom: 12
   },
   icon: {
     fontWeight: '900',
@@ -705,7 +720,7 @@ const styles = StyleSheet.create({
   },
   total: {
     color: "#00A2F4",
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "Jost",
     fontWeight: '900',
     marginTop: 25,
@@ -819,5 +834,21 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     marginHorizontal: 16,
   },
+  summaryContainer: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 16,
+    marginHorizontal: 4,
+    marginVertical: 8,
+    marginTop: 30,
+    // backgroundColor: "#FFFFFF",
+    padding: 5,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 4,
+    marginBottom: 35
+  }
 
 });

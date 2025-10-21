@@ -1,4 +1,4 @@
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { CheckCircle, Package, Truck } from "lucide-react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -16,15 +16,26 @@ import {
     Dimensions,
 } from "react-native";
 import apiClient from "../services/apiBaseUrl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import InvoiceModal from "./OrderPrivewModal";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const screenWidth = Dimensions.get("window").width;
 
 type RootStackParamList = {
     OrderHistory: { orderId: string };
+      ProductReviewAddPhoto: {
+        productId: number;
+        variantId: number;
+        userId: number;
+        productReviewId?: number; 
+    };
+    SeparateProductPage: { productId: number },
+    Support:undefined
 };
+
 
 interface OrderItem {
     userId: number;
@@ -52,11 +63,14 @@ interface OrderItem {
     shippingPinCode: string;
     shippingCountryName: string;
 }
+
 type OrderItems = {
     orderItemId: number;
     productName: string;
     // ... any other properties
 };
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ProductReviewAddPhoto'>;
 
 const trackingUpdates = [
     {
@@ -103,7 +117,7 @@ const getStatusStyle = (status: string) => {
 };
 
 const OrderHistory = () => {
-    const navigation = useNavigation<any>();
+ const navigation = useNavigation<NavigationProp>();
     const route = useRoute<RouteProp<RootStackParamList, "OrderHistory">>();
     const { orderId } = route.params;
 
@@ -124,9 +138,11 @@ const OrderHistory = () => {
 
     const firstOrder = orders[0]; // use first order for shared fields
 
-    useEffect(() => {
-        fetchOrderDetails();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            fetchOrderDetails();
+        }, [])
+    );
 
     useEffect(() => {
         if (firstOrder?.orderStatusName === "RETURN_REQUESTED") {
@@ -192,14 +208,13 @@ const OrderHistory = () => {
     const updateOrderStatus = async (orderItemId: number) => {
         try {
             await apiClient.put(`v2/orders/items/${orderItemId}/status?statusId=3`);
-            setOrders(prev =>
-                prev.map(order => {
-                    const updatedItems = orders.map(i =>
-                        i.orderItemId === orderItemId
-                            ? { ...i, orderStatusName: 'CANCELED' }
-                            : i
-                    );
-                    return { ...order, orderItemsV1DTOS: updatedItems };
+
+            setOrders(prevOrders =>
+                prevOrders.map(order => {
+                    if (order.orderItemId === orderItemId) {
+                        return { ...order, orderStatusName: 'CANCELED' };
+                    }
+                    return order;
                 })
             );
         } catch (error) {
@@ -208,18 +223,40 @@ const OrderHistory = () => {
     };
 
 
+
     const handleCancelOrder = () => {
         const activeOrders = orders?.filter(o => o.orderStatusName !== 'CANCELED');
-        console.log("activeOrders", activeOrders)
         if (activeOrders?.length === 1) {
-            // Only one active order, go directly to confirm
             setSelectedOrderItem(activeOrders[0]);
             setIsConfirmModalVisible(true);
         } else if (activeOrders?.length > 1) {
-            // Show select product modal
             setIsSelectProductModalVisible(true);
         }
     };
+
+    const onConfirmCancel = () => {
+        if (selectedOrderItem) {
+            updateOrderStatus(selectedOrderItem.orderItemId);
+            setIsConfirmModalVisible(false);
+        }
+    };
+
+
+    const handleNavigateToAddPhoto = async (order: any) => {
+    const { productId, variantId, userId } = order;
+
+    const key = `productReview_${productId}_${variantId}_${userId}`;
+    const storedId = await AsyncStorage.getItem(key);
+    const productReviewId = storedId ? parseInt(storedId, 10) : undefined;
+
+    navigation.navigate("ProductReviewAddPhoto", {
+        productId,
+        variantId,
+        userId,
+        productReviewId, // optional
+    });
+};
+
 
     return (
         <View style={styles.container}>
@@ -270,13 +307,8 @@ const OrderHistory = () => {
                                             <View style={{ alignItems: "flex-start", bottom: -9 }}>
                                                 <TouchableOpacity
                                                     style={styles.smallButtonCancel}
-                                                    onPress={() =>
-                                                        navigation.navigate("ProductReviewAddPhoto", {
-                                                            productId: order.productId,
-                                                            variantId: order.variantId,
-                                                            userId: order.userId
-                                                        })
-                                                    }
+                                                       onPress={() => handleNavigateToAddPhoto(order)}
+
                                                 >
                                                     <Text style={styles.buttonTextCancel}>Add Review</Text>
                                                 </TouchableOpacity>
@@ -468,7 +500,7 @@ const OrderHistory = () => {
                         />
 
                         <View style={styles.verticalDivider} />
-                        <TouchableOpacity style={styles.linkButton}>
+                        <TouchableOpacity style={styles.linkButton} onPress={() =>navigation.navigate("Support")}>
                             <Text style={styles.linkText}>Need Help?</Text>
                         </TouchableOpacity>
                     </View>
@@ -563,9 +595,9 @@ const OrderHistory = () => {
 
                             <TouchableOpacity
                                 onPress={() => {
-                                    updateOrderStatus(selectedOrderItem?.orderItemId ?? 0);
-                                    setIsConfirmModalVisible(false);
+                                    onConfirmCancel();
                                 }}
+
                                 style={{
                                     backgroundColor: "#0077CC",
                                     paddingVertical: 8,
@@ -778,7 +810,7 @@ const styles = StyleSheet.create({
         textAlignVertical: "top",
     },
     submitButton: {
-        backgroundColor: "#28a745",
+        backgroundColor: "#00A2F4",
         padding: 10,
         borderRadius: 6,
         alignItems: "center",

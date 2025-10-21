@@ -744,12 +744,8 @@ const CategoriesProduct = () => {
                                 keyExtractor={(item) => item.productId.toString()}
                                 numColumns={2}
                                 showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ paddingBottom: 50, paddingHorizontal: 4 }}
-                                ListHeaderComponent={
-                                    <View>
-                                        {/* Optional: any header content above FlatList */}
-                                    </View>
-                                }
+                                contentContainerStyle={{ paddingBottom: 50, paddingHorizontal:8,paddingTop:8 }}
+                              
                                 renderItem={({ item }) => {
                                     const variant = item.variants?.[0];
                                     return (
@@ -904,7 +900,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingBottom: 8
+        paddingBottom: 8,
     },
     loaderContainer: {
         flex: 1,

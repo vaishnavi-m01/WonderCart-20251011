@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
     StyleSheet,
     Text,
@@ -21,6 +21,8 @@ import { RootStackParamList } from "../SeparateProduct";
 import { Platform } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from '@react-native-firebase/auth';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
 
 
 const SignUp = () => {
@@ -30,6 +32,8 @@ const SignUp = () => {
     const [password, setPassword] = useState("");
     // const [roleId,setRoleId] = useState(2);
     const [showPassword, setShowPassword] = useState(false);
+    const scrollRef = useRef<ScrollView>(null);
+
 
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamLists>>();
     const goback = useNavigation();
@@ -175,10 +179,8 @@ const SignUp = () => {
                 await syncGuestCartToServer(user.userId, user.token);
                 await syncGuestWishlistToServer(user.userId, user.token);
 
-                if (from === "SeparateProductPage" && productId) {
-                    navigation.navigate("SeparateProductPage", { productId });
-                } else if (from === "Cart") {
-                    navigation.navigate("Main", { screen: "Cart" });
+                if (navigation.canGoBack()) {
+                    navigation.pop(2);
                 } else {
                     navigation.navigate("Main", { screen: "Home" });
                 }
@@ -300,12 +302,14 @@ const SignUp = () => {
             style={{ flex: 1, backgroundColor: "#fff" }}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-            <ScrollView
+            <KeyboardAwareScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
+                enableOnAndroid={true}
+                extraScrollHeight={Platform.OS === "ios" ? 20 : 20}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={{ justifyContent: "center", alignItems: "center" }}>
+                <View style={{ justifyContent: "center", alignItems: "center", top: -15 }}>
                     <Image
                         source={require("../../assets/images/splash.png")}
                         style={{ height: 166, width: 166 }}
@@ -409,7 +413,7 @@ const SignUp = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
         </KeyboardAvoidingView>
     );
 
@@ -424,14 +428,14 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 16,
-        paddingBottom: 40,
+        paddingBottom: 20,
     },
 
     header: {
         textAlign: "center",
         fontFamily: "Jost",
         fontWeight: "900",
-        top: -15,
+        top: -32,
         marginBottom: 5
     },
 
@@ -447,7 +451,7 @@ const styles = StyleSheet.create({
     },
     form: {
         flex: 1,
-        marginTop: 5
+        top: -8
     },
     input: {
         borderWidth: 2,
@@ -479,7 +483,7 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 30,
         alignItems: "center",
-        marginTop: 40,
+        marginTop: 28,
     },
     buttonText: {
         color: "#fff",
@@ -515,6 +519,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 15,
         marginTop: 20,
+        marginBottom: 30
     },
 
     btnContainer: {
@@ -549,5 +554,4 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginLeft: 4,
     },
-
 });

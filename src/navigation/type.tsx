@@ -13,8 +13,9 @@ export type RootStackParamList = {
   SubCategoriesListOfProducts: { categoryId: number, category: string };
   CategoriesProduct: { categoryId?: number, categoryName?: string, product?: any; searchProduct?: any; category?: any };
   ProductList: { categoryId: number, categoryName: string }
-  TopSellerProduct:{topSellerProduct:any}
-};
+  TopSellerProduct: { topSellerProduct: any }
+  TrendingNow: { trendingProducts: ProductType[] };
+}
 
 type TabsParamList = {
   Home: undefined;
@@ -75,6 +76,25 @@ export type Address = {
   line2: string;
   city: string;
   pinCode: string;
+};
+
+
+type ReviewImageType = {
+  id: number;
+  imageUrl: string;
+  productReviewId: number;
+};
+
+export type ReviewType = {
+  productReviewId: number;
+  productId: number;
+  variantId: number;
+  userId: number;
+  username: string;
+  rating: number;
+  reviewText: string;
+  createdAt: string;
+  imagesList?: ReviewImageType[]; 
 };
 
 

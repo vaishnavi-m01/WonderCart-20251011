@@ -40,13 +40,13 @@ const banner = [
     require('../../assets/images/Jewellry1.jpg'),
     require('../../assets/images/Jewellry2.jpg'),
     require('../../assets/images/Jewellry3.jpg'),
-    require('../../assets/images/Jewellry4.jpg')
+    // require('../../assets/images/Jewellry4.jpg')
 ];
 const banners = [
     require('../../assets/images/fashion1.jpg'),
     require('../../assets/images/fashion2.jpg'),
     require('../../assets/images/fashion3.jpg'),
-    require('../../assets/images/fashion4.jpg')
+    // require('../../assets/images/fashion4.jpg')
 ]
 
 type VariantType = {

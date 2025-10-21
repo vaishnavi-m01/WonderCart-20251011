@@ -216,8 +216,8 @@ const PaymentPage = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="arrowleft" color="#0077CC" size={26} style={styles.icon} />
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <AntDesign name="left" color="#0077CC" size={22} />
                 </TouchableOpacity>
                 <Text style={styles.text}> Payment Method</Text>
             </View>
@@ -399,7 +399,7 @@ const PaymentPage = () => {
                                 </>
                             ) : (
                                 <View style={styles.modalButtonRow}>
-                                   
+
                                     <TouchableOpacity
                                         style={styles.modalCancelBtn}
                                         onPress={() => setPendingModalVisible(false)}
@@ -408,7 +408,7 @@ const PaymentPage = () => {
                                         <Text style={styles.modalCancelText}>Cancel</Text>
                                     </TouchableOpacity>
 
-                                     <TouchableOpacity
+                                    <TouchableOpacity
                                         style={styles.modalConfirmBtn}
                                         onPress={handleConfirmPayment}
                                         disabled={isProcessing}
@@ -451,15 +451,22 @@ const styles = StyleSheet.create({
         paddingBottom: 14,
         paddingHorizontal: 10,
     },
+    backButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+        marginRight: 12,
+    },
     icon: {
         fontWeight: '900',
         marginLeft: 5
     },
     text: {
         color: '#0077CC',
-        fontSize: 20,
-        marginLeft: 20,
-        fontWeight: '900',
+        fontSize: 22,
+        fontWeight: '700',
+        // color: '#1A1A1A',
+        marginBottom: 2,
     },
     cancelText: {
         color: "#0077CC",
@@ -780,7 +787,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 10,
         width: '100%',
-        gap:8
+        gap: 8
     },
 
     modalConfirmBtn: {

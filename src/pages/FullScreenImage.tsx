@@ -80,9 +80,9 @@ export default function FullScreenImage() {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+      {/* <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
         <Ionicons name="close" size={30} color="#fff" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }
@@ -90,12 +90,13 @@ export default function FullScreenImage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
-    justifyContent:"center"
+    backgroundColor: '#fff',
+    justifyContent: "center",
+
   },
   image: {
     width,
-    height,
+    // height,
   },
   closeButton: {
     position: 'absolute',

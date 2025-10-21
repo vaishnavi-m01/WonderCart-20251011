@@ -35,7 +35,7 @@ const SubCategoriesListOfProducts = () => {
 
     const typingTimeoutRef = useRef<number | null>(null);
     const category = route.params?.category || '';
-    console.log("CATEGORYYYY",category)
+    console.log("CATEGORYYYY", category)
 
     const popularSearches = ['Saree', 'Earring', 'Tshirt', 'Ring', 'Bangaless'];
 
@@ -97,9 +97,10 @@ const SubCategoriesListOfProducts = () => {
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={{ flex: 1 }}>
+
                     <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
-                            <AntDesign name="arrowleft" color="#0077CC" size={26} style={styles.icon} />
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                            <AntDesign name="left" color="#0077CC" size={22} />
                         </TouchableOpacity>
                         <Text style={styles.text}>
                             {category ? (category === 'Beauty' ? 'Beauty Product' : category) : 'Cart'}
@@ -150,7 +151,7 @@ const SubCategoriesListOfProducts = () => {
                         </View>
                     )}
 
-                    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{paddingBottom:50}}>
+                    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 50 }}>
                         <SubCategories />
                     </ScrollView>
                 </View>
@@ -175,11 +176,18 @@ const styles = StyleSheet.create({
         paddingBottom: 14,
         paddingHorizontal: 10,
     },
+    backButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+        marginRight: 12,
+    },
     text: {
         color: '#0077CC',
-        fontSize: 20,
-        marginLeft: 20,
-        fontWeight: '900',
+        fontSize: 22,
+        fontWeight: '700',
+        // color: '#1A1A1A',
+        marginBottom: 2,
     },
     icon: {
         fontWeight: '900',

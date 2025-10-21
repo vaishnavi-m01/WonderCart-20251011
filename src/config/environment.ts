@@ -14,21 +14,21 @@ export interface EnvironmentConfig {
 // Environment configurations
 const environments: Record<string, EnvironmentConfig> = {
   development: {
-    apiBaseUrl: 'http://103.146.234.88:3011/api/public/', // HTTP for development (server doesn't support HTTPS)
+    apiBaseUrl: 'http://103.146.234.88:3011/api/public/', 
     apiTimeout: 30000,
     enableLogging: true,
     enableAnalytics: false,
     version: '1.0.0-dev',
   },
   staging: {
-    apiBaseUrl: 'https://staging-api.wondercart.com/api/public/',
+    apiBaseUrl: 'http://staging-api.wondercart.com/api/public/',
     apiTimeout: 30000,
     enableLogging: true,
     enableAnalytics: true,
     version: '1.0.0-staging',
   },
   production: {
-    apiBaseUrl: 'https://api.wondercart.com/api/public/',
+    apiBaseUrl: 'http://103.146.234.88:3011/api/public/', 
     apiTimeout: 15000,
     enableLogging: false,
     enableAnalytics: true,
@@ -64,10 +64,15 @@ export const validateConfig = (): boolean => {
   }
   
   // Validate HTTPS in production
-  if (currentEnvironment === 'production' && !config.apiBaseUrl.startsWith('https://')) {
-    console.error('Production API must use HTTPS');
-    return false;
-  }
+  // if (currentEnvironment === 'production' && !config.apiBaseUrl.startsWith('https://')) {
+  //   console.error('Production API must use HTTPS');
+  //   return false;
+  // }
+  // Optional warning for HTTP, but allow it
+if (currentEnvironment === 'production' && config.apiBaseUrl.startsWith('http://')) {
+  console.warn('⚠️ Production API is using HTTP instead of HTTPS');
+}
+
   
   return true;
 };

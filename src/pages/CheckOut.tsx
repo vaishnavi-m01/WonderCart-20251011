@@ -162,6 +162,8 @@ const CheckOut = () => {
 
     const handleConfirm = async () => {
         try {
+            setLoading(true);
+
             const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
             const requestBody = {
                 customerEmail: email,
@@ -191,8 +193,6 @@ const CheckOut = () => {
                 subtotal: subtotal,
                 total: orderTotal,
                 discountAmount: promotionDiscount,
-                // couponId: couponId || 0,
-                // couponAmount: couponAmount || 0,
                 items: items.map(item => ({
                     productName: item.productName,
                     orderId: 0,
@@ -207,55 +207,46 @@ const CheckOut = () => {
                 })),
             };
 
-
-            console.log("OrderPendingRequest", requestBody)
-            const response = await apiClient.post('v2/orders', requestBody);
-            console.log("OrderPendingresponse", response)
-            const orderId = response.data?.[0]?.pendingOrderId;
+            console.log("OrderPendingRequest", requestBody);
 
 
+            const response = await apiClient.post('/v2/orders', requestBody);
+
+            console.log("OrderPendingresponse", response);
 
             if (response.status === 200 || response.status === 201) {
                 const pendingId = response.data.pendingOrderId;
-                console.log("PendingIddd", pendingId)
-                console.log("CheckOutResponse", response.data.orderId)
-                setPendingOrderId(pendingId);
-                // setExpirationThreshold(response.data.expirationThreshold);
-                // setPendingModalVisible(true);
-                // startCountdown(response.data.expirationThreshold);
+                console.log("PendingIddd", pendingId);
                 navigation.navigate("PaymentPage", {
                     orderTotal,
-                    pendingId
+                    pendingId,
                 });
-
-                setIsModalVisible(false)
-
+                setIsModalVisible(false);
             } else {
                 Alert.alert("Error", "Failed to place order. Please try again.");
             }
+
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 console.log("Server responded with:", {
                     status: error.response.status,
                     data: error.response.data,
-                    headers: error.response.headers
+                    headers: error.response.headers,
                 });
 
-                // ✅ Show server error message if available
                 const serverMessage =
                     typeof error.response.data === "string"
                         ? error.response.data
                         : error.response.data?.message || "Failed to place order.";
 
-                Alert.alert("Error", serverMessage);
+                Alert.alert("", serverMessage);
             } else {
                 console.error("Unknown error:", error);
                 Alert.alert("Error", "Something went wrong. Please try again.");
             }
         } finally {
-            setLoading(false);
+            setLoading(false); // ✅ Stop loading after success or failure
         }
-
     };
 
 
@@ -278,12 +269,7 @@ const CheckOut = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* <View style={styles.header}>
-                <TouchableOpacity onPress={handleClick}>
-                    <AntDesign name="arrowleft" color="#0077CC" size={26} style={styles.icon} />
-                </TouchableOpacity>
-                <Text style={styles.text}>CheckOut</Text>
-            </View> */}
+
             <View style={styles.subcontainer}>
                 <OrderStepIndicator currentStep={2} />
             </View>
@@ -303,7 +289,7 @@ const CheckOut = () => {
                                 <Image
                                     source={Array.isArray(item.image) ? item.image[0] : { uri: item.image }}
                                     style={styles.Img}
-                                    resizeMode="contain"
+                                // resizeMode="contain"
                                 />
 
                             </View>
@@ -375,7 +361,6 @@ const CheckOut = () => {
                                     <TouchableOpacity style={styles.cancelBtn} onPress={() => setIsModalVisible(false)}>
                                         <Text style={styles.cancelText}>Cancel</Text>
                                     </TouchableOpacity>
-
                                     <TouchableOpacity
                                         onPress={handleConfirm}
                                         style={[styles.confirmBtn, loading && { opacity: 0.6 }]}
@@ -440,6 +425,7 @@ export default CheckOut
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#fff',
     },
 
     header: {
@@ -466,16 +452,7 @@ const styles = StyleSheet.create({
         marginTop: 1
     },
     card: {
-        // backgroundColor: '#fff',
-        // borderRadius: 14,
-        // padding: 13,
-        // margin: 8,
-        // elevation: 5,
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.08,
-        // shadowRadius: 4,
-        // top: -10
+
         backgroundColor: '#fdfdfd',
         borderRadius: 16,
         padding: 13,
@@ -493,7 +470,7 @@ const styles = StyleSheet.create({
     },
     itemRow: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center', // changed from 'flex-start' to 'center'
         paddingVertical: 12,
     },
     divider: {
@@ -501,13 +478,17 @@ const styles = StyleSheet.create({
         borderBottomColor: '#eee',
     },
     imageBox: {
-        width: 50,
-        height: 50,
+        width: 70, // same as image
+        height: 70,
         marginRight: 12,
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: 'hidden',
         backgroundColor: '#f2f2f2',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
+
+
     imagePlaceholder: {
         flex: 1,
         backgroundColor: '#ddd',
@@ -539,10 +520,11 @@ const styles = StyleSheet.create({
     },
 
     Img: {
-        height: 70,
-        width: 90,
-        resizeMode: "contain",
-        borderRadius: 12
+        height: 80,
+        width: 70,
+        // resizeMode: "contain",
+        borderRadius: 12,
+        marginRight: 10
     },
 
     qtyBox: {
@@ -722,10 +704,10 @@ const styles = StyleSheet.create({
 
     loaderContainer: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.3)', 
+        backgroundColor: 'rgba(0,0,0,0.3)',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 999, 
+        zIndex: 999,
     },
     loaderText: {
         marginTop: 12,

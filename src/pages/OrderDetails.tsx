@@ -57,7 +57,7 @@ export default function OrderDetails() {
 
     const [isAddressExpanded, setIsAddressExpanded] = useState(false);
     const toggleAddress = () => setIsAddressExpanded(!isAddressExpanded);
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const navigations = useNavigation<OrderDetailsNavigationProp>();
     const [userId, setUserId] = useState(0);
     const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
@@ -149,8 +149,8 @@ export default function OrderDetails() {
         <SafeAreaView style={styles.container}>
 
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <AntDesign name="arrowleft" color="#0077CC" size={26} style={styles.icon} />
+                <TouchableOpacity onPress={() => navigation.navigate("Main", { screen: "Home" })} style={styles.backButton}>
+                    <AntDesign name="left" color="#0077CC" size={22} />
                 </TouchableOpacity>
                 <Text style={styles.text}>Confirm</Text>
             </View>
@@ -241,15 +241,22 @@ const styles = StyleSheet.create({
         paddingBottom: 14,
         paddingHorizontal: 10,
     },
+    backButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+        marginRight: 12,
+    },
     icon: {
         fontWeight: '900',
         marginLeft: 5
     },
     text: {
         color: '#0077CC',
-        fontSize: 20,
-        marginLeft: 20,
-        fontWeight: '900',
+        fontSize: 22,
+        fontWeight: '700',
+        // color: '#1A1A1A',
+        marginBottom: 2,
     },
     cancelText: {
         color: "#0077CC",

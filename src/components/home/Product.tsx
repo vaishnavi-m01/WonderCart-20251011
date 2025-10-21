@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import {
   Image,
@@ -14,7 +14,7 @@ import Icon from "react-native-vector-icons/Feather";
 import apiClient from "../../services/apiBaseUrl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "../context/AddToCartItem";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
@@ -70,7 +70,7 @@ const Product = ({
   console.log("ProductCategoryName", categoryName)
   console.log("PRDOUCTiiiiiD", productId)
   console.log("VariantIdd", variantId)
-
+  console.log("productDescription", description)
 
   const handleAddToCart = async () => {
     try {
@@ -80,7 +80,7 @@ const Product = ({
         productId: productId,
         variantId: variantId,
         price,
-        quantity: 1
+        quantity: 1,
       };
 
       if (userString) {
@@ -201,10 +201,11 @@ const Product = ({
       console.error('Error fetching wishlist:', err);
     }
   };
-
-  useEffect(() => {
-    fetchWishlist();
-  }, [productId]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchWishlist();
+    }, [productId])
+  );
 
 
   const handleWishlistToggle = async () => {
@@ -266,12 +267,12 @@ const Product = ({
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={()=> navigation.navigate('SeparateProductPage', { productId,categoryName })}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('SeparateProductPage', { productId, categoryName })}>
       <View style={styles.imageContainer}>
-        {image.length > 0 && ( 
+        {image.length > 0 && (
           <Image source={image[0]} style={styles.image} />
         )}
-      
+
         <TouchableOpacity style={styles.heartIcon} onPress={handleWishlistToggle}>
           {isFavorite ? (
             <Ionicons name="heart-sharp" color="red" size={16} />
@@ -293,11 +294,11 @@ const Product = ({
         <Text style={styles.discount}>{discount}% OFF</Text>
       </View>
 
-     {deliveryStatus && orderDay ? (
-    <Text style={styles.deliveryStatus}>
-    {deliveryStatus} - {orderDay}
-   </Text>
-    ) : null}
+      {deliveryStatus && orderDay ? (
+        <Text style={styles.deliveryStatus}>
+          {deliveryStatus} - {orderDay}
+        </Text>
+      ) : null}
 
       <TouchableOpacity style={styles.btn} onPress={handleAddToCart}>
         <Text style={styles.btnText}>Add to Cart</Text>
@@ -315,8 +316,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 10,
-    margin: 5,
-    
+    margin: 2,
+    marginBottom: 4,
+
     borderColor: "#eee",
     borderWidth: 1,
     shadowColor: "#000",
@@ -385,7 +387,7 @@ const styles = StyleSheet.create({
   },
 
   discount: {
-    color: "#FF6A00",
+    color: "#4CAF50",
     fontSize: 13,
     fontWeight: "600",
     marginLeft: 6,
