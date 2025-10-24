@@ -239,13 +239,41 @@ const CheckOut = () => {
                         ? error.response.data
                         : error.response.data?.message || "Failed to place order.";
 
-                Alert.alert("", serverMessage);
+                // 👇 Format message nicely
+                let formattedMessage = serverMessage;
+
+                if (serverMessage.toLowerCase().includes("insufficient stock for variant:")) {
+                    const variantIdMatch = serverMessage.split(":")[1]?.trim();
+
+                    if (variantIdMatch) {
+                        const matchingItem = items.find(
+                            (item) =>
+                                item.variantId === variantIdMatch ||
+                                item.selectedVariantId === variantIdMatch ||
+                                item.sku === variantIdMatch
+                        );
+
+
+                        if (matchingItem) {
+                            formattedMessage = `Insufficient stock Product: ${matchingItem.productName}`;
+                        } else {
+                            formattedMessage = `Insufficient stock\nVariant ID: ${variantIdMatch}`;
+                        }
+                        console.log("Finding variant:", variantIdMatch, items);
+
+                        Alert.alert("", formattedMessage);
+
+                    }
+                }
+
+                Alert.alert("", formattedMessage);
             } else {
                 console.error("Unknown error:", error);
                 Alert.alert("Error", "Something went wrong. Please try again.");
             }
-        } finally {
-            setLoading(false); // ✅ Stop loading after success or failure
+        }
+        finally {
+            setLoading(false);
         }
     };
 

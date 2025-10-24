@@ -40,8 +40,11 @@ export type RootStackParamList = {
         product: any;
     };
     Main: {
-        screen: keyof TabParamList;
-        params?: { from: string, productId: number };
+        screen: "MainTabs";
+        params?: {
+            screen: keyof TabParamList;
+            params?: object;
+        };
     };
 
     Cart?: {
@@ -385,7 +388,10 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
 
             }
 
-            navigation.navigate("Main", { screen: "Cart" });
+            navigation.navigate("Main", {
+                screen: "MainTabs",
+                params: { screen: "Cart" },
+            });
         } catch (error) {
             console.error("Error adding to cart:", error);
             Alert.alert("Error", "Could not add item to cart.");
@@ -559,34 +565,64 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                             opacity: fadeAnim,
                             transform: [{ translateY: slideAnim }],
                         }
-                    ]}>
-                    <FlatList
-                        key={productId}
-                        data={images}
-                        horizontal
-                        pagingEnabled
-                        snapToInterval={width}
-                        decelerationRate="fast"
-                        showsHorizontalScrollIndicator={false}
-                        keyExtractor={(_, index) => index.toString()}
-                        onMomentumScrollEnd={(e) => {
-                            const index = Math.round(e.nativeEvent.contentOffset.x / width);
-                            setActiveIndex(index);
-                        }}
-                        renderItem={({ item, index }) => (
-                            <TouchableOpacity
-                                activeOpacity={0.9}
-                                onPress={() => navigation.navigate('FullScreenImage', { images, index })}
-                            >
-                                <Image
-                                    source={typeof item === 'string' ? { uri: item } : item}
-                                    style={styles.image}
-                                    resizeMode="cover"
-                                />
+                    ]}
+                >
+                    <View style={styles.imageContainer}>
+                        <FlatList
+                            key={productId}
+                            data={images}
+                            horizontal
+                            pagingEnabled
+                            snapToInterval={width}
+                            decelerationRate="fast"
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(_, index) => index.toString()}
+                            onMomentumScrollEnd={(e) => {
+                                const index = Math.round(e.nativeEvent.contentOffset.x / width);
+                                setActiveIndex(index);
+                            }}
+                            renderItem={({ item, index }) => (
+                                <TouchableOpacity
+                                    activeOpacity={0.9}
+                                    onPress={() => navigation.navigate('FullScreenImage', { images, index })}
+                                >
+                                    <Image
+                                        source={typeof item === 'string' ? { uri: item } : item}
+                                        style={styles.carouselImage}
+                                        resizeMode="cover"
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        />
 
+                        <View style={styles.iconOverlay}>
+                            <TouchableOpacity onPress={handleWishlistToggle} style={{
+                                backgroundColor: 'rgba(255,255,255,0.9)',
+                                borderRadius: 20,
+                                padding: 6,
+                                shadowColor: '#000',
+                                shadowOpacity: 0.2,
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowRadius: 2,
+                                elevation: 3,
+                                left: -5,
+                                top: -5
+                            }}>
+                                {isFavorite ? (
+                                    <Foundation name="heart" color="red" size={20} />
+                                ) : (
+                                    <AntDesign name="hearto" color="#212121" size={20} />
+                                )}
                             </TouchableOpacity>
-                        )}
-                    />
+
+                            <ShareComponent
+                                productId={productId}
+                                productName={productName}
+                                description={description}
+                                image={images}
+                            />
+                        </View>
+                    </View>
 
                     <View style={styles.pagination}>
                         {images.map((_, index) => (
@@ -599,18 +635,8 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                             />
                         ))}
                     </View>
-                    <View style={styles.iconRow}>
-                        <TouchableOpacity onPress={handleWishlistToggle}>
-                            {isFavorite ? (
-                                <Foundation name="heart" color="red" size={24} />
-                            ) : (
-                                <AntDesign name="hearto" color="#212121" size={24} />
-                            )}
-                        </TouchableOpacity>
-
-                        <ShareComponent productId={productId} productName={productName} description={description} image={images} />
-                    </View>
                 </Animated.View>
+
 
 
 
@@ -864,7 +890,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                             navigation.navigate('DeliveryAddress');
                         } else {
                             navigation.navigate('Main', {
-                                screen: 'Profile',
+                                screen: 'My Account',
                                 params: { from: 'SeparateProductPage', productId }
                             });
                         }
@@ -961,6 +987,11 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         overflow: 'hidden',
     },
+    carouselImage: {
+        width: width,
+        height: 280,
+        borderRadius: 0,
+    },
     enhancedImage: {
         width: width - 62,
         height: 280,
@@ -973,6 +1004,18 @@ const styles = StyleSheet.create({
         left: 15,
         right: 15,
         height: 60,
+    },
+    iconOverlay: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        right: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+
+        borderRadius: 10,
     },
     enhancedPagination: {
         flexDirection: 'row',
@@ -1201,7 +1244,8 @@ const styles = StyleSheet.create({
     pagination: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 10,
+        marginTop: 20,
+        paddingBottom: 10,
         gap: 6
     },
     dot: {

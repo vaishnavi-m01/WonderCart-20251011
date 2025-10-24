@@ -120,6 +120,7 @@ const Cart = () => {
   const showPrivacyPolicy = route.params?.showPrivacyPolicy;
   const cartItem = route.params?.AddToCart;
   const { cartItems, setCartItems, removeFromCart } = useCart();
+  console.log("localCartItems", cartItems)
 
   const [serverCart, setServerCart] = useState<ServerCartItem[]>([]);
   console.log("cartItems", serverCart)
@@ -137,7 +138,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const userString = await AsyncStorage.getItem("user");
+      const userString = await  AsyncStorage.getItem("user");
 
       if (userString) {
         const user = JSON.parse(userString);
@@ -391,9 +392,10 @@ const Cart = () => {
     }
     if (!isLoggedIn) {
       navigation.navigate('Main', {
-        screen: 'Profile',
-        params: { from: 'Cart' }
+        screen: 'My Account',
+        params: { fromCart: true }
       });
+
     } else {
       console.log("SelectedProductCartDetails", selectedCartItmeProductDetails)
       await AsyncStorage.setItem('selectedCartItems', JSON.stringify(selectedCartItmeProductDetails));

@@ -10,6 +10,7 @@ import {
   ViewToken,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // ✅ Import this
 
 const { width, height } = Dimensions.get('window');
 
@@ -70,18 +71,19 @@ const OnboardingScreen = () => {
     if (currentIndex < slides.length - 1) {
       scrollToIndex(currentIndex + 1);
     } else {
-      navigation.navigate('Main');
+      handleGetStarted(); 
     }
   };
 
-  const handleSkip = () => {
-    navigation.navigate('Main');
+  const handleSkip = async () => {
+    await AsyncStorage.setItem('hasSeenOnboarding', 'true'); 
+    navigation.replace('Main'); 
   };
 
-  const handleGetStarted = () => {
-    navigation.navigate('Main');
+  const handleGetStarted = async () => {
+    await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+    navigation.replace('Main');
   };
-
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => (
     <View style={styles.slide}>
@@ -97,11 +99,10 @@ const OnboardingScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Skip Button */}
+     
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
-
 
       {/* Slides */}
       <FlatList
@@ -133,7 +134,10 @@ const OnboardingScreen = () => {
       </View>
 
       {/* Next/Get Started Button */}
-      <TouchableOpacity style={styles.button} onPress={currentIndex === slides.length - 1 ? handleGetStarted : handleNext}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={currentIndex === slides.length - 1 ? handleGetStarted : handleNext}
+      >
         <Text style={styles.buttonText}>
           {currentIndex === slides.length - 1 ? 'Get Started' : 'Next'}
         </Text>
@@ -144,6 +148,7 @@ const OnboardingScreen = () => {
 
 export default OnboardingScreen;
 
+// styles (unchanged)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -240,4 +245,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-

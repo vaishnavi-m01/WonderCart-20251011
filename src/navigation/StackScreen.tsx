@@ -1,8 +1,7 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet, Platform, StatusBar, View, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { BackHandler } from 'react-native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import UnifiedHeader from '../components/common/UnifiedHeader';
 import Splash from '../tabs/Splash';
 import TabNavigator from './TabNavigator';
@@ -32,17 +31,12 @@ import SeparateProductPage from '../pages/SeparateProductPage';
 import TopSellerProduct from '../pages/TopSellerProduct';
 import JewelleryProduct from '../pages/JewelleryProduct';
 import OnboardingScreen from '../pages/OnboardingScreen';
-import GetStartedSwiper from '../pages/GetStartedSwiper';
-import GetStarted1 from '../pages/GetStarted1';
-import GetStarted2 from '../pages/GetStarted2';
-import GetStarted3 from '../pages/GetStarted3';
 import ProductReviewAddPhoto from '../pages/ProductReviewAddPhoto';
 import TrendingNow from '../pages/TrendingNow';
 import ReviewFullImage from '../pages/ReviewFullImage';
 import { ReviewType } from './type';
 import ProfileDrawer from './ProfileDrawer';
-import { navigationRef } from './navigationRef';
-
+import AddressPage from '../pages/Address';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -75,112 +69,99 @@ export type RootStackParamList = {
   TopSellerProduct: undefined;
   JewelleryProduct: undefined;
   Onboarding: undefined;
-  GetStarted1: undefined;
-  GetStarted2: undefined;
-  GetStarted3: undefined;
-  GetStartedSwiper: undefined;
   ProductReviewAddPhoto: undefined;
   TrendingNow: undefined;
   ReviewFullImage: { review: ReviewType };
   ProfileDrawer: undefined;
+  Address: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-// const headerHeight = 10;
+export const navigationRef = createNavigationContainerRef();
 
+const StackScreen = () => {
 
-const StackScreen = () => (
-  <NavigationContainer ref={navigationRef}>
-    <Stack.Navigator
-      screenOptions={{
-        header: ({ navigation, route, options, back }) => (
-          <UnifiedHeader
-            title={options.title ?? route.name}
-            showBackButton={!!back}
-            onBackPress={() => navigation.goBack()}
-            headerStyle="default"
+  useEffect(() => {
+    const backAction = () => {
+      if (!navigationRef.isReady()) return false;
 
-          />
-        ),
-      }}
-    >
+      const state = navigationRef.getState();
+      const routesCount = state?.routes?.length || 0;
+      const currentRoute = navigationRef.getCurrentRoute()?.name;
 
+      // If 8 or more pages deep, go directly to Home/Main
+      if (routesCount >= 8 && currentRoute !== 'Main') {
+        navigationRef.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+        return true;
+      }
 
-      <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
-      <Stack.Screen name="GetStartedSwiper" component={GetStartedSwiper} options={{ headerShown: false }} />
-      <Stack.Screen name="GetStarted1" component={GetStarted1} options={{ headerShown: false }} />
-      <Stack.Screen name="GetStarted2" component={GetStarted2} options={{ headerShown: false }} />
-      <Stack.Screen name="GetStarted3" component={GetStarted3} options={{ headerShown: false }} />
-      <Stack.Screen name="ProductReviewAddPhoto" component={ProductReviewAddPhoto} options={{
-        headerShown: true,
-        title: "Add Photos & Videos",
-      }} />
-      <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
+      if (navigationRef.canGoBack()) {
+        navigationRef.goBack();
+        return true;
+      }
 
-      {/* <Stack.Screen name="Main" component={ProfileDrawer} options={{ headerShown: false }} /> */}
-      <Stack.Screen name="ProductDetails" component={SeparateProductDetails} />
-      <Stack.Screen
-        name="TopSellerProduct"
-        component={TopSellerProduct}
-        options={{
-          headerShown: true,
-          title: "Top Seller",
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, []);
+
+  return (
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator
+        screenOptions={{
+          header: ({ navigation, route, options, back }) => (
+            <UnifiedHeader
+              title={options.title ?? route.name}
+              showBackButton={!!back}
+              onBackPress={() => navigation.goBack()}
+              headerStyle="default"
+            />
+          ),
         }}
-      />
-      <Stack.Screen
-        name="JewelleryProduct"
-        component={JewelleryProduct}
-        options={{
-          headerShown: true,
-          title: "Jewellery",
-        }}
-      />
-      <Stack.Screen
-        name="TrendingNow"
-        component={TrendingNow}
-        options={{
-          headerShown: true,
-          title: "Trending Now",
-        }}
-      />
-      <Stack.Screen name="SubCategoriesListOfProducts" component={SubCategoriesListOfProducts} options={{ headerShown: false }} />
-      <Stack.Screen name="CategoriesProduct" component={CategoriesProduct} options={{ headerShown: false }} />
-      <Stack.Screen name="SeparateProductPage" component={SeparateProductPage} options={{ headerShown: false }} />
-      <Stack.Screen
-        name="ReviewFullImage"
-        component={ReviewFullImage}
-        options={{
-          headerShown: true,
-          title: "Review",
-        }}
-      />
-      <Stack.Screen name="FullScreenImage" component={FullScreenImage} />
-      <Stack.Screen name="SignUp" component={SignUp} />
-      <Stack.Screen name="SignIn" component={SignIn} />
-      <Stack.Screen name="DeliveryAddress" component={DeliveryAddress} options={{
-        headerShown: true,
-        title: "Delivery Address",
-      }} />
-      <Stack.Screen name="DeliveryAddressForm" component={DeliveryAddressForm} options={{ headerShown: false }} />
-      <Stack.Screen name="PaymentPage" component={PaymentPage} options={{ headerShown: false }} />
-      <Stack.Screen name="Wishlist" component={Wishlist} options={{ headerShown: true }} />
-      <Stack.Screen name="Payment" component={Payment} />
-      <Stack.Screen name="OrderDetails" component={OrderDetails} options={{ headerShown: false }} />
-      <Stack.Screen name="Orders" component={Orders} />
-      <Stack.Screen name="ProductList" component={ProductList} />
-      <Stack.Screen name="CheckOut" component={CheckOut} />
-      <Stack.Screen name="RecentlyViewedAllProduct" component={RecentlyViewedAllProduct} options={{ headerShown: true, title: "Recently View" }} />
-      <Stack.Screen name="OrderHistory" component={OrderHistory} options={{ headerShown: true, title: "Order History" }} />
-      <Stack.Screen name="Offers" component={Offers} />
-      <Stack.Screen name="Support" component={Support} />
-      <Stack.Screen name="FAQ" component={FAQ} />
-      <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
-      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-      <Stack.Screen name="ProfileDrawer" component={ProfileDrawer} options={{ headerShown: false }} />
+      >
 
-    </Stack.Navigator>
-  </NavigationContainer>
-);
+        <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Main" component={ProfileDrawer} options={{ headerShown: false }} />
+
+        <Stack.Screen name="ProductDetails" component={SeparateProductDetails} />
+        <Stack.Screen name="TopSellerProduct" component={TopSellerProduct} options={{ headerShown: true, title: "Top Seller" }} />
+        <Stack.Screen name="JewelleryProduct" component={JewelleryProduct} options={{ headerShown: true, title: "Jewellery" }} />
+        <Stack.Screen name="TrendingNow" component={TrendingNow} options={{ headerShown: true, title: "Trending Now" }} />
+        <Stack.Screen name="SubCategoriesListOfProducts" component={SubCategoriesListOfProducts} options={{ headerShown: false }} />
+        <Stack.Screen name="CategoriesProduct" component={CategoriesProduct} options={{ headerShown: false }} />
+        <Stack.Screen name="SeparateProductPage" component={SeparateProductPage} options={{ headerShown: false }} />
+        <Stack.Screen name="ReviewFullImage" component={ReviewFullImage} options={{ headerShown: true, title: "Review" }} />
+        <Stack.Screen name="FullScreenImage" component={FullScreenImage} />
+        <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="SignIn" component={SignIn} />
+        <Stack.Screen name="DeliveryAddress" component={DeliveryAddress} options={{ headerShown: true, title: "Delivery Address" }} />
+        <Stack.Screen name="Address" component={AddressPage} options={{ headerShown: true }} />
+        <Stack.Screen name="DeliveryAddressForm" component={DeliveryAddressForm} options={{ headerShown: false }} />
+        <Stack.Screen name="PaymentPage" component={PaymentPage} options={{ headerShown: false }} />
+        <Stack.Screen name="Wishlist" component={Wishlist} options={{ headerShown: true }} />
+        <Stack.Screen name="Payment" component={Payment} />
+        <Stack.Screen name="OrderDetails" component={OrderDetails} options={{ headerShown: false }} />
+        <Stack.Screen name="Orders" component={Orders} />
+        <Stack.Screen name="ProductList" component={ProductList} />
+        <Stack.Screen name="CheckOut" component={CheckOut} />
+        <Stack.Screen name="RecentlyViewedAllProduct" component={RecentlyViewedAllProduct} options={{ headerShown: true, title: "Recently View" }} />
+        <Stack.Screen name="OrderHistory" component={OrderHistory} options={{ headerShown: true, title: "Order History" }} />
+        <Stack.Screen name="Offers" component={Offers} />
+        <Stack.Screen name="Support" component={Support} />
+        <Stack.Screen name="FAQ" component={FAQ} />
+        <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+        <Stack.Screen name="ProductReviewAddPhoto" component={ProductReviewAddPhoto} options={{ headerShown: true, title: "Add Photos & Videos" }} />
+
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
 export default StackScreen;

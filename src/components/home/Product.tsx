@@ -70,7 +70,7 @@ const Product = ({
   console.log("ProductCategoryName", categoryName)
   console.log("PRDOUCTiiiiiD", productId)
   console.log("VariantIdd", variantId)
-  console.log("productDescription", description)
+  // console.log("productDescription", description)
 
   const handleAddToCart = async () => {
     try {
@@ -147,7 +147,12 @@ const Product = ({
         console.log("Cart item stored locally!");
       }
 
-      navigation.navigate("Main", { screen: "Cart" });
+      // navigation.navigate("MainTabs", { screen: "Cart" });
+      navigation.navigate("Main", {
+        screen: "MainTabs",
+        params: { screen: "Cart" },
+      });
+
     } catch (error) {
       console.error("Error adding to cart:", error);
       Alert.alert("Error", "Could not add item to cart.");

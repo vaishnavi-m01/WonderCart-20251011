@@ -73,7 +73,9 @@ interface ProductType {
 
 
 const Categories = () => {
-  const navigation = useNavigation<CategoryScreenNavigationProp>();
+  const navigation = useNavigation<any>();
+
+  const navigations = useNavigation<CategoryScreenNavigationProp>();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -232,7 +234,7 @@ const Categories = () => {
 
       if (data.length > 0) {
         const firstProduct = data[0];
-        navigation.navigate('CategoriesProduct', {
+        navigations.navigate('CategoriesProduct', {
           categoryId: firstProduct.categoryId,
           categoryName: firstProduct.categoryName,
           searchProduct: data,
@@ -265,7 +267,7 @@ const Categories = () => {
         const categoryId = products[0].categoryId;
         const categoryName = products[0].categoryName;
 
-        navigation.navigate('CategoriesProduct', {
+        navigations.navigate('CategoriesProduct', {
           categoryId,
           categoryName,
           searchProduct: products
@@ -357,7 +359,8 @@ const Categories = () => {
       <UnifiedHeader
         title="Categories"
         showMenuButton={true}
-        onMenuPress={() => navigation.navigate('Profile' as never)}
+        // onMenuPress={() => navigation.navigate('Profile' as never)}
+        onMenuPress={() => navigation.openDrawer()}
         showSearch={true}
         showWishlist={true}
         searchText={searchText}
@@ -366,7 +369,7 @@ const Categories = () => {
           if (searchText.trim()) handleSearch();
         }}
         onSearchToggle={() => setIsSearchActive(!isSearchActive)}
-        onWishlistPress={() => navigation.navigate('Wishlist' as never)}
+        onWishlistPress={() => navigations.navigate('Wishlist' as never)}
         isSearchActive={isSearchActive}
         headerStyle="default"
       />
@@ -547,7 +550,7 @@ const Categories = () => {
               style={styles.viewAllBtn}
               onPress={() => {
                 console.log("Trending Products being passed:", trendingProducts);
-                navigation.navigate("TrendingNow", { trendingProducts });
+                navigations.navigate("TrendingNow", { trendingProducts });
               }}
 
             >

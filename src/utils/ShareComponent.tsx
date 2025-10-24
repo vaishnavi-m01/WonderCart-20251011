@@ -207,8 +207,8 @@ const ShareComponent: React.FC<Props> = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => setVisible(true)}>
-        <AntDesign name="sharealt" size={24} color="#212121" />
+      <TouchableOpacity onPress={() => setVisible(true)} style={styles.iconCircle}>
+        <AntDesign name="sharealt" size={20} color="#212121" />
       </TouchableOpacity>
 
       <Modal
@@ -277,11 +277,24 @@ const ShareComponent: React.FC<Props> = ({
 export default ShareComponent;
 
 const styles = StyleSheet.create({
+
   container: { padding: 10 },
   modalBackground: {
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "#00000077",
+  },
+  iconCircle: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 3,
+    right:-8,
+    top:-5
   },
   modalContainer: {
     backgroundColor: "#fff",

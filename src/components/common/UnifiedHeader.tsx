@@ -141,7 +141,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
             style={styles.iconButton}
             onPress={onWishlistPress}
           >
-            <EvilIcons name="heart" color="#0077CC" size={24} />
+            <EvilIcons name="heart" color="#0077CC" size={26} />
           </TouchableOpacity>
         )}
 
@@ -222,10 +222,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconButton: {
-    padding: 10,
-    borderRadius: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20, // half of width/height
     backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+
 
   // Header Style Variants
   defaultContainer: {

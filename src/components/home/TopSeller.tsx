@@ -164,7 +164,7 @@ const TopSeller = ({ productId, image, productName, price, originalPrice, descri
                 console.log("Cart item stored locally!");
             }
 
-            navigation.navigate("Main", { screen: "Cart" });
+            navigation.navigate("MainTabs", { screen: "Cart" });
         } catch (error) {
             console.error("Error adding to cart:", error);
             Alert.alert("Error", "Could not add item to cart.");
@@ -191,6 +191,7 @@ const TopSeller = ({ productId, image, productName, price, originalPrice, descri
                         productId,
                         variantId,
                         productName,
+                        description,
                         image,
                         price,
                         createdAt: new Date().toISOString(),

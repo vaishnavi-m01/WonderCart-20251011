@@ -81,14 +81,35 @@ const DeliveryAddress = () => {
         loadUserData();
     }, []);
 
+
+    useFocusEffect(
+        useCallback(() => {
+            const refreshSelected = async () => {
+                const saved = await AsyncStorage.getItem('selectedAddress');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    setSelectedAddressId(parsed.addressId);
+                }
+            };
+            refreshSelected();
+        }, [])
+    );
+
+
     const fetchAddresses = async () => {
         if (!userId) return;
         setLoading(true);
         try {
             const res = await apiClient.get(`v1/address/user/${userId}`);
-            console.log("DeliveryAddressResponse", res.data.addressId)
             setAddresses(res.data);
-            if (res.data.length > 0) {
+
+            // 🟩 Load saved selection (if available)
+            const saved = await AsyncStorage.getItem('selectedAddress');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                setSelectedAddressId(parsed.addressId);
+            } else if (res.data.length > 0) {
+                // only select first if nothing saved
                 setSelectedAddressId(res.data[0].addressId);
             }
         } catch (error) {
@@ -142,6 +163,24 @@ const DeliveryAddress = () => {
         navigation.navigate("DeliveryAddressForm");
     };
 
+    const handleSelectAddress = async (item: Address) => {
+        setSelectedAddressId(item.addressId);
+
+        const country = countries.find(c => c.countryId === item.countryId);
+        const state = states.find(s => s.stateId === item.stateId);
+
+        const selectedAddress = {
+            ...item,
+            name: username,
+            phone: phone,
+            countryName: country?.countryName || '',
+            stateName: state?.stateName || '',
+        };
+
+        await AsyncStorage.setItem('selectedAddress', JSON.stringify(selectedAddress));
+    };
+
+
     const handleDeliver = async (address: Address) => {
         try {
             const country = countries.find(c => c.countryId === address.countryId);
@@ -171,13 +210,8 @@ const DeliveryAddress = () => {
         const isSelected = item.addressId === selectedAddressId;
 
         return (
-            <TouchableOpacity
-                onPress={() => setSelectedAddressId(item.addressId)}
-                style={[
-                    // styles.addressItem,
-                    // isSelected && styles.selectedAddress,
-                ]}
-            >
+            <TouchableOpacity onPress={() => handleSelectAddress(item)}>
+
                 <View style={[
                     styles.addressCard,
                     isSelected && styles.selectedCard && styles.selectedAddress, ,
@@ -260,7 +294,7 @@ const DeliveryAddress = () => {
                         <View style={styles.bottomLine} />
                     </View>
                 }
-                contentContainerStyle={{ paddingBottom: 100,margin:10 }}
+                contentContainerStyle={{ paddingBottom: 100, margin: 10 }}
                 showsVerticalScrollIndicator={false}
             />
 
@@ -316,7 +350,7 @@ const styles = StyleSheet.create({
     },
     subContainer: {
         paddingHorizontal: 10,
-        
+
     },
 
     statusContainer: {
@@ -353,7 +387,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#E3F2FF",
         borderColor: "#E3F2FF",
         marginTop: 8,
-        marginBottom:30
+        marginBottom: 30
 
     },
     btnText: {

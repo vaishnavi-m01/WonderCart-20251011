@@ -25,6 +25,7 @@ type ProductType = {
 
 const JewelleryProduct = ({ navigation, route }: any) => {
   const { JewelleryProducts } = route.params || { JewelleryProducts: [] };
+  console.log("JewelleryProducts",JewelleryProducts)
 
   return (
     <View style={styles.container}>
@@ -44,6 +45,8 @@ const JewelleryProduct = ({ navigation, route }: any) => {
             (firstVariant?.variantImage?.length
               ? firstVariant.variantImage[0].imageUrl
               : undefined);
+                console.log("Product Descriptionnnn:", item.description);
+
 
           return (
             <TouchableOpacity
@@ -56,6 +59,7 @@ const JewelleryProduct = ({ navigation, route }: any) => {
                 productId={item.productId}
                 image={imageUri ? [{ uri: imageUri }] : []}
                 productName={item.title}
+                description={item.description}
                 price={firstVariant?.price ?? 0}
                 variantId={variantId}
               />

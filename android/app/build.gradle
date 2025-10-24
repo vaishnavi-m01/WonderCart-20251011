@@ -5,6 +5,10 @@ apply plugin: "com.facebook.react"
 
 project.ext.react = [
     enableHermes: true, 
+    entryFile: "index.js",
+    bundleInDebug: true,   
+    bundleInRelease: true,
+
 ]
 /**
  * This is the configuration block to customize your React Native Android app.

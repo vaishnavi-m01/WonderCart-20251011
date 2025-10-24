@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList, ImageSourcePropType, Modal, Pressable, Scr
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from "../services/apiBaseUrl";
-import  { TabParamList } from "../components/SeparateProduct";
+import { TabParamList } from "../components/SeparateProduct";
 import Product from "../components/home/Product";
 import { getProductThumbnail } from "../utils/ProductImageHelper";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -140,7 +140,10 @@ const CategoriesProduct = () => {
     const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
     const [isPriceFiltered, setIsPriceFiltered] = useState(false);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
-    const [selectedTag, setSelectedTag] = useState<number | null>(null);
+    // const [selectedTag, setSelectedTag] = useState<number | null>(null);
+    // const [selectedBrands, setSelectedBrands] = useState<number[]>([]);
+    const [selectedTags, setSelectedTags] = useState<number[]>([]);
+
     const [startPrice, setStartPrice] = useState<number | null>(null);
     const [endPrice, setEndPrice] = useState<number | null>(null);
     const [isSearchActive, setIsSearchActive] = useState(false);
@@ -148,11 +151,10 @@ const CategoriesProduct = () => {
     const typingTimeoutRef = useRef<number | null>(null);
 
 
-    console.log("selectedTag", selectedTag)
 
 
     const [filteredProducts, setFilteredProducts] = useState([]);
-    console.log("filteredProducds", filteredProducts)
+    // console.log("filteredProducds", filteredProducts)
     const [noProduct, setNoProduct] = useState(false);
 
 
@@ -212,6 +214,52 @@ const CategoriesProduct = () => {
     }, []);
 
 
+    const toggleBrand = (id: number) => {
+        const newBrand = selectedBrand === id ? null : id;
+        setSelectedBrand(newBrand);
+
+        fetchFilteredProducts(
+            startPrice,
+            endPrice,
+            newBrand ? [newBrand] : [],
+            selectedTags
+        );
+    };
+
+
+
+    const toggleTag = (id: number) => {
+        setSelectedTags(prev => {
+            const newTags = prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id];
+            fetchFilteredProducts(
+                startPrice,
+                endPrice,
+                selectedBrand ? [selectedBrand] : [],
+                newTags
+            );
+            return newTags;
+        });
+    };
+
+
+
+
+
+    const getSelectedCount = (section: string) => {
+        switch (section) {
+            case 'Category':
+                return selectedCategories.length;
+            case 'Price':
+                return selectedPrices.length;
+            case 'Brand':
+                return selectedBrand ? 1 : 0;
+
+            case 'Tags':
+                return selectedTags.length;
+            default:
+                return 0;
+        }
+    };
 
 
     const clearStoredProduct = async () => {
@@ -292,9 +340,9 @@ const CategoriesProduct = () => {
             startPrice,
             endPrice,
             selectedBrand,
-            selectedTag,
+            selectedTags,
         });
-    }, [startPrice, endPrice, selectedBrand, selectedTag]);
+    }, [startPrice, endPrice, selectedBrand, selectedTags]);
 
 
 
@@ -317,11 +365,18 @@ const CategoriesProduct = () => {
 
 
     const togglePrice = async (item: string) => {
+        // setSelectedPrices((prev) => {
+        //     const updated = prev.includes(item)
+        //         ? prev.filter((i) => i !== item)
+        //         : [item];
+        //     return updated;
+        // });
         setSelectedPrices((prev) => {
-            const updated = prev.includes(item)
-                ? prev.filter((i) => i !== item)
-                : [item];
-            return updated;
+            if (prev.includes(item)) {
+                return prev.filter((i) => i !== item); // deselect if already selected
+            } else {
+                return [...prev, item]; // add to selection instead of replacing
+            }
         });
 
         const range = getPriceRange(item);
@@ -334,12 +389,13 @@ const CategoriesProduct = () => {
                 await fetchFilteredProducts(
                     range.startPrice,
                     range.endPrice,
-                    selectedBrand,
-                    selectedTag
+                    selectedBrand ? [selectedBrand] : [],
+                    selectedTags
                 );
 
                 console.log("Start Price:", range.startPrice);
                 console.log("End Price:", range.endPrice);
+                console.log("Selected Brands:", selectedBrand)
             } catch (error) {
                 console.error("Failed to fetch:", error);
                 setFilteredProducts([]);
@@ -359,51 +415,84 @@ const CategoriesProduct = () => {
 
 
 
-    useEffect(() => {
-        if (categoryId) {
-            console.log('Filters Updated →', {
-                startPrice,
-                endPrice,
-                selectedBrand,
-                selectedTag,
-            });
+    // useEffect(() => {
+    //     if (categoryId) {
+    //         console.log('Filters Updated →', {
+    //             startPrice,
+    //             endPrice,
+    //             selectedBrand,
+    //             selectedTag,
+    //         });
 
-            fetchFilteredProducts(startPrice, endPrice, selectedBrand, selectedTag);
-        } else {
-            console.warn("categoryId is missing! Skipping API call.");
+    //         fetchFilteredProducts(startPrice, endPrice, selectedBrand, selectedTag);
+    //     } else {
+    //         console.warn("categoryId is missing! Skipping API call.");
+    //     }
+    // }, [startPrice, endPrice, selectedBrand, selectedTag, categoryId]);
+    useEffect(() => {
+        if (selectedPrices.length === 0 && !selectedBrand && selectedTags.length === 0) {
+            setStartPrice(null);
+            setEndPrice(null);
+            setFilteredProducts([]);
+            setIsPriceFiltered(false);
+            return;
         }
-    }, [startPrice, endPrice, selectedBrand, selectedTag, categoryId]);
+
+        let minPrice = Infinity;
+        let maxPrice = -Infinity;
+
+        selectedPrices.forEach((priceLabel) => {
+            const range = getPriceRange(priceLabel);
+            if (range) {
+                if (range.startPrice < minPrice) minPrice = range.startPrice;
+                if (range.endPrice > maxPrice) maxPrice = range.endPrice;
+            }
+        });
+
+        setStartPrice(minPrice !== Infinity ? minPrice : null);
+        setEndPrice(maxPrice !== -Infinity ? maxPrice : null);
+        setIsPriceFiltered(true);
+
+        fetchFilteredProducts(
+            minPrice !== Infinity ? minPrice : null,
+            maxPrice !== -Infinity ? maxPrice : null,
+            selectedBrand ? [selectedBrand] : [],
+            selectedTags
+        );
+    }, [selectedPrices, selectedBrand, selectedTags]);
+
+
 
 
 
     const fetchFilteredProducts = async (
         start: number | null,
         end: number | null,
-        brand: number | null,
-        tag: number | null
+        brands: number[],
+        tags: number[]
     ) => {
         setLoading(true);
         setNoProduct(false);
 
         try {
             let url = `v2/products/filter?categoryId=${categoryId}`;
-            let isPriceRangeSet = false;
+            console.log("filterURL", url)
 
             if (start !== null && end !== null) {
                 url += `&startPrice=${start}&endPrice=${end}`;
-                isPriceRangeSet = true;
             }
 
-            if (brand !== null) {
-                console.log(" Brand filter applied:", brand);
-                url += `&brandId=${brand}`;
+            if (brands.length > 0) {
+                url += `&brandId=${brands[0]}`;
             }
 
-            if (tag !== null) {
-                console.log("Tag filter applied:", tag);
-                url += `&tags=${tag}`;
-            }
 
+
+
+
+            if (tags.length > 0) {
+                url += `&tags=${tags.join(',')}`;
+            }
 
             console.log("filterUrl →", url);
 
@@ -418,7 +507,7 @@ const CategoriesProduct = () => {
                 setNoProduct(true);
             }
             setFilteredProducts(normalized);
-            // setIsPriceFiltered(isPriceRangeSet);
+            console.log("FilterProducts", normalized)
         } catch (err) {
             console.error('Error:', err);
             setNoProduct(true);
@@ -427,12 +516,42 @@ const CategoriesProduct = () => {
         setLoading(false);
     };
 
+    const handleClearCurrentSection = () => {
+        switch (selectedSection) {
+            case 'Category':
+                setSelectedCategories([]);
+                break;
+            case 'Price':
+                setSelectedPrices([]);
+                setStartPrice(null);
+                setEndPrice(null);
+                setIsPriceFiltered(false);
+                break;
+            case 'Brand':
+                setSelectedBrand(null);
+                break;
+            case 'Tags':
+                setSelectedTags([]);
+                break;
+            default:
+                break;
+        }
+
+        // Re-fetch products after clearing this section
+        fetchFilteredProducts(
+            startPrice,
+            endPrice,
+            selectedBrand ? [selectedBrand] : [],
+            selectedTags
+        );
+    };
+
 
     const handleClearFilters = () => {
         setSelectedCategories([]);
         setSelectedPrices([]);
         setSelectedBrand(null);
-        setSelectedTag(null);
+        setSelectedTags([]);
         setIsPriceFiltered(false);
         setFilteredProducts([]);
     };
@@ -543,7 +662,7 @@ const CategoriesProduct = () => {
                         <Pressable
                             key={item.id}
                             style={styles.checkboxRow}
-                            onPress={() => setSelectedBrand(item.id)}
+                            onPress={() => toggleBrand(item.id)}
                         >
                             <View style={styles.checkboxOuter}>
                                 {selectedBrand === item.id && (
@@ -555,6 +674,7 @@ const CategoriesProduct = () => {
                             <Text style={styles.checkboxLabel}>{item.label}</Text>
                         </Pressable>
                     ))}
+
                 </>
             );
         } else if (selectedSection === "Tags") {
@@ -567,14 +687,14 @@ const CategoriesProduct = () => {
                                 key={item.id}
                                 style={[
                                     styles.priceBox,
-                                    selectedTag === item.id && styles.priceBoxSelected,
+                                    selectedTags.includes(item.id) && styles.priceBoxSelected,
                                 ]}
-                                onPress={() => setSelectedTag(item.id)}
+                                onPress={() => toggleTag(item.id)}
                             >
                                 <Text
                                     numberOfLines={1}
                                     style={{
-                                        color: selectedTag === item.id ? '#0077CC' : '#000',
+                                        color: selectedTags.includes(item.id) ? '#0077CC' : '#000',
                                         fontSize: 12,
                                     }}
                                 >
@@ -586,6 +706,7 @@ const CategoriesProduct = () => {
                 </>
             );
         }
+
         else if (selectedSection === 'Collection') {
             return (
                 <>
@@ -744,8 +865,8 @@ const CategoriesProduct = () => {
                                 keyExtractor={(item) => item.productId.toString()}
                                 numColumns={2}
                                 showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ paddingBottom: 50, paddingHorizontal:8,paddingTop:8 }}
-                              
+                                contentContainerStyle={{ paddingBottom: 50, paddingHorizontal: 8, paddingTop: 8 }}
+
                                 renderItem={({ item }) => {
                                     const variant = item.variants?.[0];
                                     return (
@@ -818,6 +939,7 @@ const CategoriesProduct = () => {
                 onRequestClose={() => setFilterModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
+                    <View></View>
                     <View style={styles.FilterModalContainer}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Filter</Text>
@@ -830,7 +952,7 @@ const CategoriesProduct = () => {
 
                         <View style={styles.contentRow}>
 
-                            <View style={styles.leftPanel}>
+                            {/* <View style={styles.leftPanel}>
 
                                 {filteredSections.map((section) => (
                                     <Pressable
@@ -853,10 +975,49 @@ const CategoriesProduct = () => {
                                         </Text>
                                     </Pressable>
                                 ))}
+                            </View> */}
+
+                            <View style={styles.leftPanel}>
+                                {filteredSections.map((section) => {
+                                    const count = getSelectedCount(section);
+
+                                    return (
+                                        <Pressable
+                                            key={section}
+                                            onPress={() => setSelectedSection(section)}
+                                            style={[
+                                                styles.sectionItem,
+                                                selectedSection === section && styles.activeSectionItem, // Only selected gets background
+                                            ]}
+                                        >
+                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <Text
+                                                    style={{
+                                                        color: selectedSection === section ? '#0077CC' : '#555',
+                                                        fontWeight: selectedSection === section ? 'bold' : 'normal',
+                                                    }}
+                                                >
+                                                    {section}
+                                                </Text>
+                                                {count > 0 && (
+                                                    <View style={styles.selectedCountBadge}>
+                                                        <Text style={styles.selectedCountText}>{count}</Text>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        </Pressable>
+                                    );
+                                })}
+
+                                {/* Clear All Button outside the selected highlight */}
+                                <TouchableOpacity style={styles.clearAllButton} onPress={handleClearFilters}>
+                                    <MaterialIcons name="clear-all" size={20} color="#0077CC" />
+                                    <Text style={styles.clearAllText}>Clear All</Text>
+                                </TouchableOpacity>
                             </View>
 
-                            <View style={styles.verticalLine} />
 
+                            <View style={styles.verticalLine} />
 
                             <View style={{ flex: 1 }}>
                                 <ScrollView style={styles.rightPanel} contentContainerStyle={{ paddingBottom: 20 }}>
@@ -866,7 +1027,7 @@ const CategoriesProduct = () => {
                                 <View style={styles.filterActionButtons}>
                                     <TouchableOpacity
                                         style={styles.clearButton}
-                                        onPress={handleClearFilters}
+                                        onPress={handleClearCurrentSection}
                                     >
                                         <Text style={styles.clearText}>Clear</Text>
                                     </TouchableOpacity>
@@ -987,6 +1148,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         borderRadius: 8,
         paddingVertical: 4,
+        height: "90%"
     },
     sectionItem: {
         paddingVertical: 12,
@@ -997,6 +1159,42 @@ const styles = StyleSheet.create({
         borderLeftWidth: 3,
         borderColor: '#0077CC',
     },
+    selectedCountBadge: {
+        backgroundColor: '#0077CC',
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: 8,
+    },
+    selectedCountText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    clearAllButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#EAF5FF',
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: '#0077CC',
+        gap: 4,
+        alignSelf: 'flex-start',
+        top:15,
+        left:10
+    },
+    clearAllText: {
+        color: '#0077CC',
+        fontWeight: '600',
+        fontSize: 12,
+    },
+
+
     verticalLine: {
         width: 1,
         backgroundColor: '#ccc',
@@ -1063,40 +1261,45 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 12,
         borderTopRightRadius: 12,
         padding: 16,
-        height: '60%',
+        height: '65%',
     },
     filterActionButtons: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingTop: 16,
+        justifyContent: 'flex-end',
         paddingBottom: 20,
         paddingHorizontal: 12,
-        // top:90
+        top: 22,
+        gap:8
     },
 
-    clearButton: {
-        backgroundColor: '#eee',
-        paddingVertical: 10,
-        paddingHorizontal: 18,
-        borderRadius: 8,
-    },
+   clearButton: {
+    backgroundColor: '#EEE',
+    paddingVertical: 8,       // smaller height
+    paddingHorizontal: 12,    // smaller width
+    borderRadius: 6,          // slightly smaller radius
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,           // spacing between buttons
+},
+doneButton: {
+    backgroundColor: '#0077CC',
+    paddingVertical: 8,       // smaller height
+    paddingHorizontal: 16,    // smaller width
+    borderRadius: 6,          // slightly smaller radius
+    alignItems: 'center',
+    justifyContent: 'center',
+},
+clearText: {
+    color: '#444',
+    fontWeight: '600',
+    fontSize: 12,             // smaller text
+},
+doneText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 12,             // smaller text
+},
 
-    doneButton: {
-        backgroundColor: '#0077CC',
-        paddingVertical: 10,
-        paddingHorizontal: 24,
-        borderRadius: 8,
-    },
-
-    clearText: {
-        color: '#444',
-        fontWeight: 'bold',
-    },
-
-    doneText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
     bottomButtons: {
         flexDirection: 'row',
         justifyContent: 'space-between',

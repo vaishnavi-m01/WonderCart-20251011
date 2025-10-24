@@ -19,12 +19,9 @@ import { Dimensions } from 'react-native';
 import { getProductThumbnail } from '../utils/ProductImageHelper';
 import SecureStorage from '../services/SecureStorage';
 import UnifiedHeader from '../components/common/UnifiedHeader';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
 
-import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { drawerNavigationRef, navigationRef, openDrawer, openProfileDrawer } from '../navigation/navigationRef';
-import OpenDrawer from '../utils/openDrawer';
+import {  useNavigation } from '@react-navigation/native';
+
 
 
 type RootStackParamList = {
@@ -344,19 +341,7 @@ const Home = () => {
             <UnifiedHeader
                 title="WonderCart"
                 showMenuButton={true}
-                // onMenuPress={() => {
-                //     if (navigationRef.isReady() && navigationRef.current) {
-                //         navigationRef.current.dispatch(DrawerActions.openDrawer());
-                //     }
-                // }}
-                onMenuPress={() => navigation.navigate("Profile")}
-                // onMenuPress={() => {
-                //     if (navigationRef.isReady()) {
-                //         navigationRef.dispatch(DrawerActions.openDrawer());
-                //     }
-                // }}
-
-
+                onMenuPress={() => navigation.openDrawer()}
                 showWishlist={true}
                 searchText={searchText}
                 onSearchChange={setSearchText}
@@ -418,7 +403,7 @@ const Home = () => {
                                         navigations.navigate('Orders' as never);
                                         break;
                                     case 'Address':
-                                        navigations.navigate('DeliveryAddress' as never);
+                                        navigations.navigate('Address' as never);
                                         break;
                                     case 'Offers':
                                         navigations.navigate('Offers' as never);
@@ -781,6 +766,7 @@ const Home = () => {
                                         productId={item.productId}
                                         image={imageUrl}
                                         productName={item.title}
+                                        description={item.description}
                                         price={item.variants?.price ?? 0}
                                         variantId={variantId}
                                     />

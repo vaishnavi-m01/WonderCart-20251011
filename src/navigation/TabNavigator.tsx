@@ -9,6 +9,7 @@ import Category from '../tabs/Categories';
 import Cart from '../tabs/Cart';
 import Notification from '../tabs/Notification';
 import ProfileDrawer from './ProfileDrawer';
+import ProfileWithHeader from '../components/profile.tsx/ProfileWithHeader';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +19,7 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        lazy: false,
         headerShown: false,
         tabBarLabelStyle: {
           fontSize: 11,
@@ -74,7 +76,9 @@ const TabNavigator = () => {
       <Tab.Screen name="Cart" component={Cart} options={{ tabBarLabel: 'Cart' }} />
       <Tab.Screen name="Notification" component={Notification} options={{ tabBarLabel: 'Notification' }} />
       {/* <Tab.Screen name="Profile" component={Profile} options={{ tabBarLabel: 'Profile' }} /> */}
-      <Tab.Screen name="Profile" component={ProfileDrawer} options={{ lazy: false }} />
+      {/* <Tab.Screen name="Profile" component={ProfileDrawer} options={{ lazy: false }} /> */}
+      <Tab.Screen name="Profile" component={ProfileWithHeader} />
+
 
     </Tab.Navigator>
   );

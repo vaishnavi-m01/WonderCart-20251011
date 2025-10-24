@@ -42,6 +42,7 @@ const TopSellerProduct = ({ navigation, route }: any) => {
                       : []
                 }
                 productName={item.title}
+                description={item.description}
                 price={item.variants?.price ?? 0}
                 variantId={variantId}
               />

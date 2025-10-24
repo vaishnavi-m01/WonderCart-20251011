@@ -148,18 +148,18 @@ const Orders = () => {
                             )
                         ) : (
                             <View style={styles.thumbnailRow}>
-                                {item.orderItemsV1DTOS.slice(0, 2).map((product, idx) => (
+                                {item.orderItemsV1DTOS.slice(0, 1).map((product, idx) => (
                                     <Image
                                         key={idx}
                                         source={{ uri: getProductImage(product) }}
                                         style={styles.thumbnail}
                                     />
                                 ))}
-                                {item.orderItemsV1DTOS.length > 2 && (
+                                {/* {item.orderItemsV1DTOS.length > 2 && (
                                     <Text style={styles.moreText}>
-                                        +{item.orderItemsV1DTOS.length - 2} more
+                                        +{item.orderItemsV1DTOS.length - 1} more
                                     </Text>
-                                )}
+                                )} */}
                             </View>
                         )}
 
@@ -204,7 +204,7 @@ const Orders = () => {
                     <Text style={styles.emptyText}>You're not logged in.</Text>
                     <TouchableOpacity
                         style={styles.exploreButton}
-                        onPress={() => navigation.navigate('Main', { screen: 'Profile' })}
+                        onPress={() => navigation.navigate('Main', {  screen: 'My Account', })}
                     >
                         <Text style={styles.exploreButtonText}>Login Now</Text>
                     </TouchableOpacity>
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     emptyText: { fontSize: 16, color: '#555', textAlign: 'center', marginBottom: 20 },
     exploreButton: { backgroundColor: '#0077CC', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20 },
-    exploreButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 10 },
+    exploreButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
     row: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 },
     smallButtonView: { paddingVertical: 4, paddingHorizontal: 10, backgroundColor: '#1976D2', borderRadius: 6 },
     buttonTextView: { fontSize: 12, color: '#fff', fontWeight: '600' },

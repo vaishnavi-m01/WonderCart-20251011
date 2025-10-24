@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../navigation/StackScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
@@ -10,13 +11,26 @@ type Props = {
 };
 
 const Splash = ({ navigation }: Props) => {
+ 
   useEffect(() => {
-    console.log(' Splash started...');
-    const timer = setTimeout(() => {
-      navigation.replace('Onboarding');
-    }, 2000);
+    const checkOnboardingStatus = async () => {
+      console.log('Splash started...');
+      try {
+        const hasSeenOnboarding = await AsyncStorage.getItem('hasSeenOnboarding');
+        setTimeout(() => {
+          if (hasSeenOnboarding === 'true') {
+            navigation.replace('Main');
+          } else {
+            navigation.replace('Onboarding');
+          }
+        }, 2000);
+      } catch (error) {
+        console.log('Error checking onboarding status:', error);
+        navigation.replace('Onboarding');
+      }
+    };
 
-    return () => clearTimeout(timer);
+    checkOnboardingStatus();
   }, [navigation]);
 
   return (

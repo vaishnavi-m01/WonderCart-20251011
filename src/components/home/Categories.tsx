@@ -4,7 +4,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Category, RootStackParamList } from '../../navigation/type';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import apiClient from '../../services/apiBaseUrl';
-import { ActivityIcon } from 'lucide-react-native';
 import { ActivityIndicator } from 'react-native';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;

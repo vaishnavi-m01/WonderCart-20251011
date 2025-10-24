@@ -71,14 +71,14 @@ const DeliveryAddressForm = () => {
   const editAddress = route.params?.editAddress;
 
 
-   useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (city.trim().length >= 3) {
         fetchPincodeByCity(city.trim());
       }
-    }, 800); 
+    }, 800);
 
-    return () => clearTimeout(timer); 
+    return () => clearTimeout(timer);
   }, [city]);
 
   useEffect(() => {
@@ -92,9 +92,11 @@ const DeliveryAddressForm = () => {
     }
   }, [editAddress]);
 
-
-
   
+
+
+
+
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -262,7 +264,8 @@ const DeliveryAddressForm = () => {
         Alert.alert('Success', 'Address saved successfully!');
       }
 
-      navigation.navigate("DeliveryAddress", { refresh: true });
+      // navigation.navigate("DeliveryAddress", { refresh: true });
+      navigation.goBack();
 
     } catch (error) {
       console.error('Error saving address:', error);
@@ -271,7 +274,7 @@ const DeliveryAddressForm = () => {
   };
 
 
-  
+
 
   const fetchPincodeByCity = async (cityName: string) => {
     try {
@@ -293,8 +296,8 @@ const DeliveryAddressForm = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <AntDesign name="arrowleft" color="#0077CC" size={24} style={styles.icon}/>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <AntDesign name="left" color="#0077CC" size={22} />
         </TouchableOpacity>
 
         <Text style={styles.text}>{editAddress ? "Edit Address" : "Delivery Address"}</Text>
@@ -303,7 +306,7 @@ const DeliveryAddressForm = () => {
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1, paddingBottom: 30,marginRight:10,marginLeft:10 }}
+        style={{ flex: 1, paddingBottom: 30, marginRight: 10, marginLeft: 10 }}
       >
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -505,26 +508,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flex: 1,
   },
- header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        elevation: 5,
-        paddingTop: 10,
-        paddingBottom: 14,
-        paddingHorizontal: 10,
-    },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    elevation: 5,
+    paddingTop: 10,
+    paddingBottom: 14,
+    paddingHorizontal: 10,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    marginRight: 12,
+  },
 
-    text: {
-        color: '#0077CC',
-        fontSize: 20,
-        marginLeft: 20,
-        fontWeight: '900',
-    },
-    icon: {
-        fontWeight: '900',
-        marginLeft: 5
-    },
+  text: {
+    color: '#0077CC',
+    fontSize: 22,
+    fontWeight: '700',
+    // color: '#1A1A1A',
+    marginBottom: 2,
+  },
+
+  icon: {
+    fontWeight: '900',
+    marginLeft: 5
+  },
   scrollView: {
     paddingBottom: 40
   },

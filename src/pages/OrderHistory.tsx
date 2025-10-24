@@ -20,20 +20,22 @@ import { useCallback, useEffect, useState } from "react";
 import InvoiceModal from "./OrderPrivewModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Entypo from 'react-native-vector-icons/Entypo';
+
 
 
 const screenWidth = Dimensions.get("window").width;
 
 type RootStackParamList = {
     OrderHistory: { orderId: string };
-      ProductReviewAddPhoto: {
+    ProductReviewAddPhoto: {
         productId: number;
         variantId: number;
         userId: number;
-        productReviewId?: number; 
+        productReviewId?: number;
     };
     SeparateProductPage: { productId: number },
-    Support:undefined
+    Support: undefined
 };
 
 
@@ -117,7 +119,7 @@ const getStatusStyle = (status: string) => {
 };
 
 const OrderHistory = () => {
- const navigation = useNavigation<NavigationProp>();
+    const navigation = useNavigation<NavigationProp>();
     const route = useRoute<RouteProp<RootStackParamList, "OrderHistory">>();
     const { orderId } = route.params;
 
@@ -134,9 +136,12 @@ const OrderHistory = () => {
     const [isSelectProductModalVisible, setIsSelectProductModalVisible] = useState(false);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
+    const [selectedOrderItems, setSelectedOrderItems] = useState<OrderItems[]>([]);
 
 
-    const firstOrder = orders[0]; // use first order for shared fields
+
+
+    const firstOrder = orders[0];
 
     useFocusEffect(
         useCallback(() => {
@@ -227,35 +232,38 @@ const OrderHistory = () => {
     const handleCancelOrder = () => {
         const activeOrders = orders?.filter(o => o.orderStatusName !== 'CANCELED');
         if (activeOrders?.length === 1) {
-            setSelectedOrderItem(activeOrders[0]);
+            setSelectedOrderItems([activeOrders[0]]);
             setIsConfirmModalVisible(true);
         } else if (activeOrders?.length > 1) {
+            setSelectedOrderItems([]);
             setIsSelectProductModalVisible(true);
         }
     };
 
     const onConfirmCancel = () => {
-        if (selectedOrderItem) {
-            updateOrderStatus(selectedOrderItem.orderItemId);
-            setIsConfirmModalVisible(false);
-        }
+        selectedOrderItems.forEach(item => {
+            updateOrderStatus(item.orderItemId);
+        });
+        setIsConfirmModalVisible(false);
+        setSelectedOrderItems([]);
     };
 
 
+
     const handleNavigateToAddPhoto = async (order: any) => {
-    const { productId, variantId, userId } = order;
+        const { productId, variantId, userId } = order;
 
-    const key = `productReview_${productId}_${variantId}_${userId}`;
-    const storedId = await AsyncStorage.getItem(key);
-    const productReviewId = storedId ? parseInt(storedId, 10) : undefined;
+        const key = `productReview_${productId}_${variantId}_${userId}`;
+        const storedId = await AsyncStorage.getItem(key);
+        const productReviewId = storedId ? parseInt(storedId, 10) : undefined;
 
-    navigation.navigate("ProductReviewAddPhoto", {
-        productId,
-        variantId,
-        userId,
-        productReviewId, // optional
-    });
-};
+        navigation.navigate("ProductReviewAddPhoto", {
+            productId,
+            variantId,
+            userId,
+            productReviewId, // optional
+        });
+    };
 
 
     return (
@@ -307,7 +315,7 @@ const OrderHistory = () => {
                                             <View style={{ alignItems: "flex-start", bottom: -9 }}>
                                                 <TouchableOpacity
                                                     style={styles.smallButtonCancel}
-                                                       onPress={() => handleNavigateToAddPhoto(order)}
+                                                    onPress={() => handleNavigateToAddPhoto(order)}
 
                                                 >
                                                     <Text style={styles.buttonTextCancel}>Add Review</Text>
@@ -500,7 +508,7 @@ const OrderHistory = () => {
                         />
 
                         <View style={styles.verticalDivider} />
-                        <TouchableOpacity style={styles.linkButton} onPress={() =>navigation.navigate("Support")}>
+                        <TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate("Support")}>
                             <Text style={styles.linkText}>Need Help?</Text>
                         </TouchableOpacity>
                     </View>
@@ -528,40 +536,86 @@ const OrderHistory = () => {
                     </View>
                 </View>
             </Modal>
+
             {/* //select order cancel model */}
 
             <Modal
                 visible={isSelectProductModalVisible}
                 transparent
-                animationType="slide"
+                animationType="fade"
             >
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Select a product to cancel:</Text>
-                        {orders?.filter(o => o.orderStatusName !== 'CANCELED')?.map((order, idx) => (
-                            <TouchableOpacity
-                                key={idx}
-                                onPress={() => {
-
-                                    setIsSelectProductModalVisible(false);
-                                    setIsConfirmModalVisible(true);
-                                    setSelectedOrderItem(order);
-                                }}
-                                style={styles.modalOption}
-                            >
-                                <Text>{order.productName}</Text>
+                        {/* Header */}
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Select Products to Cancel</Text>
+                            <TouchableOpacity onPress={() => setIsSelectProductModalVisible(false)}>
+                                <Entypo name="cross" size={22} color="#444" />
                             </TouchableOpacity>
-                        ))}
+                        </View>
 
-                        <TouchableOpacity
-                            onPress={() => setIsSelectProductModalVisible(false)}
-                            style={styles.modalCancelBtn}
-                        >
-                            <Text style={{ color: 'red' }}>Cancel</Text>
-                        </TouchableOpacity>
+                        {/* Product list */}
+                        <View style={styles.modalList}>
+                            {orders?.filter(o => o.orderStatusName !== 'CANCELED')?.map((order, idx) => {
+                                const isSelected = selectedOrderItems.some(item => item.orderItemId === order.orderItemId);
+
+                                return (
+                                    <TouchableOpacity
+                                        key={idx}
+                                        onPress={() => {
+                                            if (isSelected) {
+                                                setSelectedOrderItems(prev => prev.filter(item => item.orderItemId !== order.orderItemId));
+                                            } else {
+                                                setSelectedOrderItems(prev => [...prev, order]);
+                                            }
+                                        }}
+                                        activeOpacity={0.8}
+                                        style={[
+                                            styles.modalOption,
+                                            isSelected && styles.modalOptionSelected,
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.modalOptionText,
+                                                isSelected && styles.modalOptionTextSelected,
+                                            ]}
+                                        >
+                                            {order.productName}
+                                        </Text>
+                                        {isSelected && (
+                                            <Entypo name="check" size={18} color="#0077CC" />
+                                        )}
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+
+                        {/* Footer buttons */}
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity
+                                onPress={() => setIsSelectProductModalVisible(false)}
+                                style={styles.modalCancelBtn}
+                            >
+                                <Text style={styles.modalCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setIsSelectProductModalVisible(false);
+                                    if (selectedOrderItems.length > 0) {
+                                        setIsConfirmModalVisible(true);
+                                    }
+                                }}
+                                style={styles.modalConfirmBtn}
+                            >
+                                <Text style={styles.modalConfirmText}>Confirm</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
+
             {/* //cancel confirm model */}
 
             <Modal
@@ -572,13 +626,38 @@ const OrderHistory = () => {
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>
-                            Confirm cancel for: {selectedOrderItem?.productName}?
+                            Confirm cancel for:{' '}
+                            <Text style={styles.productNames}>
+                                {selectedOrderItems.map(item => item.productName).join(', ')}
+                            </Text>
+                            ?
                         </Text>
+
+
 
                         <View style={{ flexDirection: "row", justifyContent: "center", gap: 12, marginTop: 15, marginBottom: 10 }}>
 
                             <TouchableOpacity
                                 onPress={() => setIsConfirmModalVisible(false)}
+                                style={{
+                                    backgroundColor: "#F2F2F2",
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 20,
+                                    borderRadius: 6,
+                                    alignItems: "center",
+                                    borderWidth: 1,
+                                    borderColor: "#D7D7D7",
+                                    minWidth: 100,
+                                }}
+                            >
+                                <Text style={{ color: "#5C5C5C", fontWeight: "600", fontSize: 14 }}>No</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    onConfirmCancel();
+                                }}
+
                                 style={{
                                     backgroundColor: "#F8D7DA",
                                     paddingVertical: 8,
@@ -590,24 +669,7 @@ const OrderHistory = () => {
                                     minWidth: 100,
                                 }}
                             >
-                                <Text style={{ color: "#721C24", fontWeight: "600", fontSize: 14 }}>No</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    onConfirmCancel();
-                                }}
-
-                                style={{
-                                    backgroundColor: "#0077CC",
-                                    paddingVertical: 8,
-                                    paddingHorizontal: 20,
-                                    borderRadius: 6,
-                                    alignItems: "center",
-                                    minWidth: 100,
-                                }}
-                            >
-                                <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>Yes, Cancel</Text>
+                                <Text style={{ color: "#721C24", fontWeight: "600", fontSize: 14 }}>Yes, Cancel</Text>
                             </TouchableOpacity>
 
                         </View>
@@ -799,7 +861,7 @@ const styles = StyleSheet.create({
     verticalDivider: { width: 1, height: 14, backgroundColor: "#ccc", marginHorizontal: 10 },
     modalOverlay: { flex: 1, backgroundColor: "#000000aa", justifyContent: "center", padding: 20 },
     modalContent: { backgroundColor: "#fff", borderRadius: 10, padding: 20 },
-    modalTitle: { fontWeight: "bold", marginBottom: 10, fontSize: 16, marginTop: 5 },
+    // modalTitle: { fontWeight: "bold", marginBottom: 10, fontSize: 16, marginTop: 5, },
     textInput: {
         borderWidth: 1,
         borderColor: "#ccc",
@@ -861,19 +923,105 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         width: '80%',
     },
-    modalOption: {
-        paddingVertical: 10,
+    modelrow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        backgroundColor: "#DBE2E9",
+        padding: 8,
+
     },
-    modalCancelBtn: {
-        marginTop: 10,
-        alignItems: 'center',
-    },
+    // modalOption: {
+    //     paddingVertical: 10,
+    // },
+    // modalCancelBtn: {
+    //     marginTop: 10,
+    //     alignItems: 'center',
+    // },
     confirmButton: {
         backgroundColor: 'red',
         padding: 10,
         alignItems: 'center',
         borderRadius: 5,
         marginTop: 10,
+    },
+
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    // modalTitle: {
+    //     fontSize: 16,
+    //     fontWeight: '600',
+    //     color: '#333',
+    //     marginBottom: 2
+    // },
+    modalTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#333',
+        textAlign: 'center',
+        marginBottom: 10,
+        lineHeight: 22,
+    },
+    productNames: {
+        fontWeight: '700',
+        color: '#0077CC',
+    },
+    modalList: {
+        maxHeight: 280,
+        marginTop: 5,
+    },
+    modalOption: {
+        backgroundColor: '#F9F9F9',
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        marginVertical: 5,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    modalOptionSelected: {
+        backgroundColor: '#E6F3FF',
+        borderColor: '#0077CC',
+    },
+    modalOptionText: {
+        color: '#333',
+        fontSize: 14,
+    },
+    modalOptionTextSelected: {
+        color: '#0077CC',
+        fontWeight: '600',
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 18,
+    },
+    modalCancelBtn: {
+        borderColor: 'red',
+        borderWidth: 1,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    modalCancelText: {
+        color: 'red',
+        fontWeight: '600',
+    },
+    modalConfirmBtn: {
+        backgroundColor: '#0077CC',
+        paddingHorizontal: 22,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    modalConfirmText: {
+        color: '#fff',
+        fontWeight: '600',
     },
 
 });
