@@ -217,7 +217,7 @@ const Orders = () => {
                     <Text style={styles.emptyText}>You haven't placed any orders yet.</Text>
                     <TouchableOpacity
                         style={styles.exploreButton}
-                        onPress={() => navigation.navigate('Main', { screen: 'Home' })}
+                        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
                     >
                         <Text style={styles.exploreButtonText}>Start Shopping</Text>
                     </TouchableOpacity>
