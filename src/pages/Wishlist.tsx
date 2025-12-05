@@ -185,20 +185,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   image: { width: '100%', height: '100%' },
+
   heartIcon: {
     position: 'absolute',
     top: 8,
     right: 8,
+
+    width: 28,          // fixed size
+    height: 28,
+    borderRadius: 16,   // half of 32 → perfect circle
+
     backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 6,
-    elevation: 4,
-    zIndex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowRadius: 2,
   },
+
   productName: { fontSize: 14, color: '#111', fontWeight: '600', marginVertical: 8, textAlign: 'center' },
   iconContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   amount: { fontWeight: 'bold', fontSize: 14, color: '#111' },

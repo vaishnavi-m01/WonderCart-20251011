@@ -43,14 +43,14 @@ const Profile = forwardRef(({ isEditing }: { isEditing: boolean }, ref) => {
   const [roleId, setRoleId] = useState("");
   const firstInputRef = useRef<TextInput>(null);
   const route = useRoute<any>();
-  const [editing, setEditing] = useState(isEditing); 
+  const [editing, setEditing] = useState(isEditing);
 
 
   const isFocused = useIsFocused();
 
   useEffect(() => {
     if (isFocused) {
-      setEditing(false); 
+      setEditing(false);
     }
   }, [isFocused]);
 
@@ -85,7 +85,7 @@ const Profile = forwardRef(({ isEditing }: { isEditing: boolean }, ref) => {
   useEffect(() => { checkLogin(); }, [isFocused]);
 
   // --- VALIDATION FUNCTIONS ---
-  const validateName = (text: string) => /^[A-Za-z\s]{0,30}$/.test(text);
+  const validateName = (text: string) => /^[A-Za-z.\s]{0,30}$/.test(text);
   const validatePhone = (text: string) => /^\d{0,10}$/.test(text);
 
   const handleEmailChange = (text: string) => {

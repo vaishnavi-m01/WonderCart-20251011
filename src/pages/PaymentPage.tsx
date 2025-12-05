@@ -45,6 +45,7 @@ const PaymentPage = () => {
     const [saveCard, setSaveCard] = useState(false);
     const route = useRoute<PaymentPageRouteProp>();
     const { orderTotal, pendingId } = route.params;
+    console.log("orderTotall",orderTotal)
     const [isProcessing, setIsProcessing] = useState(false);
     // const navigations = useNavigation<StackNavigationProp<RootStackParamList, 'PaymentPage'>>();
     const [pendingModalVisible, setPendingModalVisible] = useState(false);

@@ -1,4 +1,4 @@
-import { Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AddToCart from "../components/cart/AddToCart";
 import { NavigatorScreenParams, RouteProp, useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
@@ -105,11 +105,9 @@ type ProductItem = {
 type CartRouteProp = RouteProp<RootStackParamList, 'Cart'>;
 
 
-
-
 const Cart = () => {
   const route = useRoute<CartRouteProp>();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Cart'>>();
+  const navigation = useNavigation<any>();
 
   const showOrders = route.params?.showOrders;
   const showAddress = route.params?.showAddress;
@@ -138,7 +136,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const userString = await  AsyncStorage.getItem("user");
+      const userString = await AsyncStorage.getItem("user");
 
       if (userString) {
         const user = JSON.parse(userString);
@@ -583,10 +581,8 @@ const Cart = () => {
         <UnifiedHeader
           title="Cart"
           showMenuButton={true}
-          onMenuPress={() => {
-            // Navigate to Profile tab which has drawer navigation
-            navigation.navigate('Profile' as never);
-          }}
+          onMenuPress={() => navigation.openDrawer()}
+
           headerStyle="default"
         />
       )}
@@ -594,7 +590,8 @@ const Cart = () => {
 
         {
           loading ? (
-            <Text>Loading...</Text>
+                    <ActivityIndicator size="large" color="#059ff8" />
+            
           ) : isLoggedIn && serverCart.length > 0 ? (
             <ScrollView showsVerticalScrollIndicator={false} >
               {serverCart.map((cart, index) => (

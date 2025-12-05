@@ -14,6 +14,8 @@ import {
   RefreshControl,
   HapticFeedback,
   Platform,
+  KeyboardAvoidingView,
+  SafeAreaView,
 } from "react-native";
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -270,7 +272,7 @@ const Categories = () => {
         navigations.navigate('CategoriesProduct', {
           categoryId,
           categoryName,
-          searchProduct: products
+          // searchProduct: products
         });
       } else {
         ToastAndroid.show("No products found in this category", ToastAndroid.SHORT);
@@ -355,7 +357,9 @@ const Categories = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView
+
+      style={styles.container}>
       <UnifiedHeader
         title="Categories"
         showMenuButton={true}
@@ -373,22 +377,7 @@ const Categories = () => {
         isSearchActive={isSearchActive}
         headerStyle="default"
       />
-      {/* showBackButton={true}
-                showSearch={true}
-                searchText={searchText}
-                onSearchChange={setSearchText}
-                onSearchSubmit={() => {
-                    if (searchText.trim()) {
-                        handleSearch();
-                        setSearchText('');
-                        setIsSearchActive(false);
-                    }
-                }}
-                onSearchToggle={() => setIsSearchActive(!isSearchActive)}
-                onBackPress={handleClick}
-                isSearchActive={isSearchActive}
-                headerStyle="default" */}
-
+     
       <View style={styles.filterContainer}>
         {filters.map((filter) => (
           <TouchableOpacity
@@ -616,7 +605,7 @@ const Categories = () => {
           )}
         </Animated.View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
