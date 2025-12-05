@@ -112,7 +112,6 @@ const CategoriesProduct = () => {
 
     const categoryId = route.params?.categoryId;
     const parentCategoryName = route.params?.category;
-    console.log("parentCategoryName", parentCategoryName)
 
     const categoryName = route.params?.categoryName;
     const passedProduct = route.params?.product;
@@ -120,14 +119,13 @@ const CategoriesProduct = () => {
     const routes = useRoute<RouteProp<RootStackParamList, 'CategoriesProduct'>>();
     const { product } = routes.params;
     const { searchProduct } = routes.params;
-    console.log("SEARCHPRODUCT", searchProduct)
-    console.log("Productttey", product)
+    console.log("SearchProduct", searchProduct)
+
     const [products, setProducts] = useState<ProductType[]>([]);
     const selectedProducts = products.filter(p => p.categoryId === categoryId);
 
 
     const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
-    console.log("SelectedProductteyks", selectedProduct?.categoryName)
     const [loading, setLoading] = useState(true);
     const handleClick = () => navigation.goBack();
 
@@ -139,6 +137,7 @@ const CategoriesProduct = () => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
     const [isPriceFiltered, setIsPriceFiltered] = useState(false);
+    console.log("ispriceFiltered",isPriceFiltered)
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     // const [selectedTag, setSelectedTag] = useState<number | null>(null);
     // const [selectedBrands, setSelectedBrands] = useState<number[]>([]);
@@ -154,7 +153,6 @@ const CategoriesProduct = () => {
 
 
     const [filteredProducts, setFilteredProducts] = useState([]);
-    // console.log("filteredProducds", filteredProducts)
     const [noProduct, setNoProduct] = useState(false);
 
 
@@ -365,27 +363,22 @@ const CategoriesProduct = () => {
 
 
     const togglePrice = async (item: string) => {
-        // setSelectedPrices((prev) => {
-        //     const updated = prev.includes(item)
-        //         ? prev.filter((i) => i !== item)
-        //         : [item];
-        //     return updated;
-        // });
         setSelectedPrices((prev) => {
             if (prev.includes(item)) {
-                return prev.filter((i) => i !== item); // deselect if already selected
+                return prev.filter((i) => i !== item);
             } else {
-                return [...prev, item]; // add to selection instead of replacing
+                return [...prev, item];
             }
         });
 
         const range = getPriceRange(item);
+
         if (range && range.startPrice !== undefined && range.endPrice !== undefined) {
             setStartPrice(range.startPrice);
             setEndPrice(range.endPrice);
-            setIsPriceFiltered(true);
 
             try {
+                // 1️⃣ FIRST: fetch new filtered products
                 await fetchFilteredProducts(
                     range.startPrice,
                     range.endPrice,
@@ -393,9 +386,9 @@ const CategoriesProduct = () => {
                     selectedTags
                 );
 
-                console.log("Start Price:", range.startPrice);
-                console.log("End Price:", range.endPrice);
-                console.log("Selected Brands:", selectedBrand)
+                // 2️⃣ NOW turn on price filter (after fetch)
+                setIsPriceFiltered(true);
+
             } catch (error) {
                 console.error("Failed to fetch:", error);
                 setFilteredProducts([]);
@@ -403,32 +396,17 @@ const CategoriesProduct = () => {
             }
 
         } else {
-            // If deselected
+            // deselect case
             setStartPrice(null);
             setEndPrice(null);
-            setIsPriceFiltered(false);
             setFilteredProducts([]);
+            setIsPriceFiltered(false);
         }
     };
 
+    
 
 
-
-
-    // useEffect(() => {
-    //     if (categoryId) {
-    //         console.log('Filters Updated →', {
-    //             startPrice,
-    //             endPrice,
-    //             selectedBrand,
-    //             selectedTag,
-    //         });
-
-    //         fetchFilteredProducts(startPrice, endPrice, selectedBrand, selectedTag);
-    //     } else {
-    //         console.warn("categoryId is missing! Skipping API call.");
-    //     }
-    // }, [startPrice, endPrice, selectedBrand, selectedTag, categoryId]);
     useEffect(() => {
         if (selectedPrices.length === 0 && !selectedBrand && selectedTags.length === 0) {
             setStartPrice(null);
@@ -463,8 +441,6 @@ const CategoriesProduct = () => {
 
 
 
-
-
     const fetchFilteredProducts = async (
         start: number | null,
         end: number | null,
@@ -474,6 +450,7 @@ const CategoriesProduct = () => {
         setLoading(true);
         setNoProduct(false);
 
+        console.log("fetchFilteredProducts")
         try {
             let url = `v2/products/filter?categoryId=${categoryId}`;
             console.log("filterURL", url)
@@ -599,6 +576,8 @@ const CategoriesProduct = () => {
             console.error('Search error:', error);
         }
     };
+
+
 
 
     const renderRightContent = () => {
@@ -796,6 +775,8 @@ const CategoriesProduct = () => {
         }
     };
 
+    
+
     return (
         <View style={styles.container}>
             <UnifiedHeader
@@ -866,7 +847,6 @@ const CategoriesProduct = () => {
                                 numColumns={2}
                                 showsVerticalScrollIndicator={false}
                                 contentContainerStyle={{ paddingBottom: 50, paddingHorizontal: 8, paddingTop: 8 }}
-
                                 renderItem={({ item }) => {
                                     const variant = item.variants?.[0];
                                     return (
@@ -952,30 +932,7 @@ const CategoriesProduct = () => {
 
                         <View style={styles.contentRow}>
 
-                            {/* <View style={styles.leftPanel}>
 
-                                {filteredSections.map((section) => (
-                                    <Pressable
-                                        key={section}
-                                        onPress={() => setSelectedSection(section)}
-                                        style={[
-                                            styles.sectionItem,
-                                            selectedSection === section && styles.activeSectionItem,
-                                        ]}
-                                    >
-                                        <Text
-                                            style={{
-                                                color:
-                                                    selectedSection === section ? '#0077CC' : '#555',
-                                                fontWeight:
-                                                    selectedSection === section ? 'bold' : 'normal',
-                                            }}
-                                        >
-                                            {section}
-                                        </Text>
-                                    </Pressable>
-                                ))}
-                            </View> */}
 
                             <View style={styles.leftPanel}>
                                 {filteredSections.map((section) => {
@@ -987,7 +944,7 @@ const CategoriesProduct = () => {
                                             onPress={() => setSelectedSection(section)}
                                             style={[
                                                 styles.sectionItem,
-                                                selectedSection === section && styles.activeSectionItem, // Only selected gets background
+                                                selectedSection === section && styles.activeSectionItem,
                                             ]}
                                         >
                                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1185,8 +1142,8 @@ const styles = StyleSheet.create({
         borderColor: '#0077CC',
         gap: 4,
         alignSelf: 'flex-start',
-        top:15,
-        left:10
+        top: 15,
+        left: 10
     },
     clearAllText: {
         color: '#0077CC',
@@ -1269,36 +1226,36 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         paddingHorizontal: 12,
         top: 22,
-        gap:8
+        gap: 8
     },
 
-   clearButton: {
-    backgroundColor: '#EEE',
-    paddingVertical: 8,       // smaller height
-    paddingHorizontal: 12,    // smaller width
-    borderRadius: 6,          // slightly smaller radius
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,           // spacing between buttons
-},
-doneButton: {
-    backgroundColor: '#0077CC',
-    paddingVertical: 8,       // smaller height
-    paddingHorizontal: 16,    // smaller width
-    borderRadius: 6,          // slightly smaller radius
-    alignItems: 'center',
-    justifyContent: 'center',
-},
-clearText: {
-    color: '#444',
-    fontWeight: '600',
-    fontSize: 12,             // smaller text
-},
-doneText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 12,             // smaller text
-},
+    clearButton: {
+        backgroundColor: '#EEE',
+        paddingVertical: 8,       // smaller height
+        paddingHorizontal: 12,    // smaller width
+        borderRadius: 6,          // slightly smaller radius
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 8,           // spacing between buttons
+    },
+    doneButton: {
+        backgroundColor: '#0077CC',
+        paddingVertical: 8,       // smaller height
+        paddingHorizontal: 16,    // smaller width
+        borderRadius: 6,          // slightly smaller radius
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    clearText: {
+        color: '#444',
+        fontWeight: '600',
+        fontSize: 12,             // smaller text
+    },
+    doneText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 12,             // smaller text
+    },
 
     bottomButtons: {
         flexDirection: 'row',

@@ -14,10 +14,10 @@ import { TabParamList } from '../SeparateProduct';
 
 
 export type RootStackParamList = {
-  Main: undefined | { screen: keyof TabParamList }; 
-//   NotificationDetails: { id: string }; 
+    Main: undefined | { screen: keyof TabParamList };
+    //   NotificationDetails: { id: string }; 
 };
-const SettingsScreen = ({ closeModal }: { closeModal: () => void }) => {   
+const SettingsScreen = ({ closeModal }: { closeModal: () => void }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
 
@@ -39,7 +39,7 @@ const SettingsScreen = ({ closeModal }: { closeModal: () => void }) => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={closeModal}>
-                    <AntDesign name="arrowleft" color="#0077CC" size={26} />
+                    <AntDesign name="left" color="#0077CC" size={22} style={styles.backButton} />
                 </TouchableOpacity>
                 <Text style={styles.text}>Notification Settings</Text>
             </View>
@@ -143,6 +143,12 @@ const styles = StyleSheet.create({
         paddingTop: 10,
         paddingBottom: 14,
         paddingHorizontal: 10,
+    },
+    backButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#F5F5F5',
+        marginRight: 12,
     },
     text: {
         color: '#0077CC',

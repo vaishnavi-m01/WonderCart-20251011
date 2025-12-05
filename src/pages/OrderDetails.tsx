@@ -23,6 +23,7 @@ type OrderItem = {
     price: number;
     quantity: number;
     sku: string;
+    total:string;
     variantId: number;
     productId: number;
     shippingLine1: string;
@@ -203,7 +204,7 @@ export default function OrderDetails() {
 
                 <View style={styles.totalBox}>
                     <Text style={styles.totalLabel}>Total Paid</Text>
-                    <Text style={styles.totalAmount}>₹{total}</Text>
+                    <Text style={styles.totalAmount}>₹{orderItems[0]?.total}</Text>
                 </View>
 
             </ScrollView>

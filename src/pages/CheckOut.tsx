@@ -286,10 +286,10 @@ const CheckOut = () => {
 
 
     const itemsTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const deliveryFee = 40;
+    const deliveryFee = 20;
     const codFee = 7;
     const promotionDiscount = 40;
-    const orderTotal = itemsTotal + deliveryFee + codFee - promotionDiscount;
+    const orderTotal = itemsTotal + deliveryFee + codFee;
 
 
 
@@ -347,7 +347,7 @@ const CheckOut = () => {
 
                 <Text style={styles.title}>Order Summary</Text>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Items:</Text>
+                    <Text style={styles.label}>Amount:</Text>
                     <Text>₹{itemsTotal}</Text>
                 </View>
                 <View style={styles.row}>
@@ -358,16 +358,17 @@ const CheckOut = () => {
                     <Text style={styles.Cash}>Cash/Pay on Delivery fee</Text>
                     <Text>₹{codFee}</Text>
                 </View>
-                <View style={styles.row}>
+                {/* <View style={styles.row}>
                     <Text>Total:</Text>
                     <Text>₹{itemsTotal + deliveryFee + codFee}</Text>
-                </View>
-                <View style={styles.row}>
+                </View> */}
+                {/* <View style={styles.row}>
                     <Text>Promotion Applied:</Text>
                     <Text>-₹{promotionDiscount}</Text>
-                </View>
+                </View> */}
                 <View style={styles.row}>
                     <Text style={styles.Total}>Order Total:</Text>
+                    {/* <Text style={styles.totalAmount}>₹{orderTotal}</Text> */}
                     <Text style={styles.totalAmount}>₹{orderTotal}</Text>
                 </View>
 

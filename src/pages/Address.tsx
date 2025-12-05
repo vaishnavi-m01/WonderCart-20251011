@@ -261,14 +261,14 @@ const AddressPage = () => {
                         <Text style={styles.addresses}>No addresses found.</Text>
                     )
                 }
-                ListFooterComponent={
-                    <View style={styles.subContainer}>
-                        <TouchableOpacity style={styles.button} onPress={handleAddAddress}>
-                            <Text style={styles.btnText}>Add a new delivery address</Text>
-                        </TouchableOpacity>
-                        <View style={styles.bottomLine} />
-                    </View>
-                }
+                // ListFooterComponent={
+                //     <View style={styles.subContainer}>
+                //         <TouchableOpacity style={styles.button} onPress={handleAddAddress}>
+                //             <Text style={styles.btnText}>Add a new delivery address</Text>
+                //         </TouchableOpacity>
+                //         <View style={styles.bottomLine} />
+                //     </View>
+                // }
                 contentContainerStyle={{ paddingBottom: 100, margin: 10 }}
                 showsVerticalScrollIndicator={false}
             />
@@ -292,5 +292,5 @@ const styles = StyleSheet.create({
     addressLine: { fontSize: 14, color: '#333', marginVertical: 2, paddingLeft: 30 },
     phoneLine: { marginTop: 6, fontSize: 14, fontWeight: '700', paddingLeft: 30 },
     rightContainer: { flexDirection: 'row', marginLeft: 'auto', gap: 3, alignItems: 'center' },
-    addresses: { marginBottom: 20, textAlign: "center" },
+    addresses: { marginBottom: 20, textAlign: "center",justifyContent:"center",paddingTop:250 },
 });

@@ -275,7 +275,7 @@ const InvoiceModal: React.FC<Props> = ({
                                 </Text>
                             </View>
 
-                            <ScrollView style={styles.contentArea}>
+                            <ScrollView style={styles.contentArea} showsVerticalScrollIndicator={false}>
                                 <View style={styles.userDetails}>
                                     <Text style={styles.sectionHeader}>User Details</Text>
                                     <Text>Name: {user.name}</Text>

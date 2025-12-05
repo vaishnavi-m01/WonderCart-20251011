@@ -21,6 +21,7 @@ const TabNavigator = () => {
       screenOptions={({ route }) => ({
         lazy: false,
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarLabelStyle: {
           fontSize: 11,
           marginBottom: Platform.OS === 'android' ? 4 : 0,
@@ -83,7 +84,7 @@ const TabNavigator = () => {
     </Tab.Navigator>
   );
 };
-  
+
 export default TabNavigator;
 
 

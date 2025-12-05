@@ -109,7 +109,7 @@ const Offers = () => {
             horizontal
             keyExtractor={(item) => item.productId.toString()}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 30 }}
+            // contentContainerStyle={{ paddingBottom: 30 }}
             renderItem={({ item }) => {
               const imageUrl = item.variants?.variantImage?.[0]?.imageUrl ?? "";
               const variantId = item.variants?.variantId;
@@ -192,6 +192,6 @@ const styles = StyleSheet.create({
   gradientBackground: { borderRadius: 8, padding: 16, marginBottom: 16, minHeight: 60 },
   sectionText: { fontSize: 14, color: '#303030', fontWeight: "800", paddingLeft: 15, paddingVertical: 8 },
   sectionTitle: { fontSize: 20, fontWeight: '900', color: "#4A4A4A", margin: 3, paddingTop: 3, paddingLeft: 13 },
-  bannerImg: { width: '100%', height: 130, borderRadius: 15, resizeMode: 'cover', marginBottom: 30, marginTop: 20 },
+  bannerImg: { width: '100%', height: 130, borderRadius: 15, resizeMode: 'cover', marginBottom: 30 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
 });

@@ -185,7 +185,7 @@ const Product = ({
       const res = await apiClient.get(`v1/wishlist?userId=${user.userId}`);
       const wishlist = res.data || [];
 
-      console.log("WishlistDataa", wishlist)
+   
       const matched = wishlist.find(
         // (item: any) => item.productId === productId && item.variantId === variantId
         (item: any) => item.productId === productId
@@ -350,17 +350,23 @@ const styles = StyleSheet.create({
   heartIcon: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    right: 6,
+
+    width: 28,          
+    height: 28,
+    borderRadius: 16,   
+
     backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 6,
-    elevation: 4,
-    zIndex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowRadius: 2,
   },
+
 
 
   productName: {

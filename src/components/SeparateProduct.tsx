@@ -596,18 +596,24 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                         />
 
                         <View style={styles.iconOverlay}>
-                            <TouchableOpacity onPress={handleWishlistToggle} style={{
-                                backgroundColor: 'rgba(255,255,255,0.9)',
-                                borderRadius: 20,
-                                padding: 6,
-                                shadowColor: '#000',
-                                shadowOpacity: 0.2,
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowRadius: 2,
-                                elevation: 3,
-                                left: -5,
-                                top: -5
-                            }}>
+                            <TouchableOpacity
+                                onPress={handleWishlistToggle}
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.9)',
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 18,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    shadowColor: '#000',
+                                    shadowOpacity: 0.2,
+                                    shadowOffset: { width: 0, height: 1 },
+                                    shadowRadius: 2,
+                                    elevation: 3,
+                                    left: -5,
+                                    top: -5
+                                }}
+                            >
                                 {isFavorite ? (
                                     <Foundation name="heart" color="red" size={20} />
                                 ) : (
@@ -622,6 +628,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
                                 image={images}
                             />
                         </View>
+
                     </View>
 
                     <View style={styles.pagination}>
@@ -674,10 +681,13 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
 
 
                 <View style={styles.amountContainer}>
-                    <Entypo name="star" color="#FFE70C" size={15} />
-                    <Text style={styles.review}>4.2 (3243 Reviews)</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <Entypo name="star" color="#FFE70C" size={15} />
+                        <Text style={styles.review}>4.2 (3243 Reviews)</Text>
+                    </View>
+
                     <View style={styles.right}>
-                        <Text style={styles.offer}>{discount}%</Text>
+                        {/* <Text style={styles.offer}>{discount}%</Text> */}
                         <Text style={styles.price}>₹{selectedVariant.price}</Text>
                     </View>
                 </View>
@@ -686,42 +696,7 @@ const SeparateProduct = ({ categoryName, productId, productName, description, im
 
 
 
-                {/* <TouchableOpacity style={styles.addToCartBtn} onPress={handleClick}>
-                    <Text style={styles.btnText}>Add to Cart</Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.buyNowBtn}
-                    onPress={async () => {
-                        const selectedProduct = {
-                            id,
-                            productName,
-                            description,
-                            image: images,
-                            price: selectedVariant.price,
-                            originalPrice: selectedVariant.originalPrice || originalPrice,
-                            offer: selectedVariant.offer || offer,
-                            discount: selectedVariant.discount || discount,
-                            selectedVariantId: selectedVariant.variantId,
-                            sku: selectedVariant.sku
-                        };
-
-                        console.log("Selected Product store Ays:", selectedProduct);
-
-                        await AsyncStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
-                        await AsyncStorage.removeItem('selectedCartItems');
-
-                        if (isLoggedIn) {
-                            navigation.navigate('DeliveryAddress');
-                            // navigation.navigate('CheckOut')
-                        } else {
-                            navigation.navigate('Main', { screen: 'Profile' });
-                        }
-                    }}
-                >
-                    <Text style={styles.buyNowText}>Buy Now</Text>
-                </TouchableOpacity>
- */}
 
                 {/* Enhanced Reviews Section */}
 
@@ -920,7 +895,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8FAFC',
-        paddingHorizontal: 8,
+        // paddingHorizontal: 8,
         paddingTop: 15
     },
     animatedViewContainer: {
@@ -1273,6 +1248,7 @@ const styles = StyleSheet.create({
     },
     amountContainer: {
         flexDirection: "row",
+        justifyContent: "space-between",
         padding: 5,
         marginTop: 2,
         alignItems: 'center'
@@ -1289,8 +1265,9 @@ const styles = StyleSheet.create({
     },
     right: {
         flexDirection: "row",
+        justifyContent: "space-between",
         paddingLeft: 90,
-        gap: 8
+
     },
     offer: {
         textAlign: "right",
@@ -1471,6 +1448,7 @@ const styles = StyleSheet.create({
 
     scrollContent: {
         paddingBottom: 100,
+        paddingHorizontal: 8
     },
     cartBtn: {
         flex: 1,
